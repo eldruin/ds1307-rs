@@ -133,6 +133,20 @@ where
         self.write_register_decimal(Register::MINUTES, minutes)
     }
 
+    /// Set the hours
+    /// Changes the operating mode to 12h/24h depending on the parameter
+    /// Will thrown an InvalidInputData error if the hours are out of range.
+    pub fn set_hours(&mut self, hours: Hours) -> Result<(), Error<E>> {
+        match hours {
+            Hours::H24(h) if h > 23 => Err(Error::InvalidInputData),
+            Hours::H24(h) => self.write_register_decimal(Register::HOURS, h),
+            Hours::AM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
+            Hours::AM(h) => self.write_register(Register::HOURS, 0b0100_0000 | decimal_to_packed_bcd(h)),
+            Hours::PM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
+            Hours::PM(h) => self.write_register(Register::HOURS, 0b0110_0000 | decimal_to_packed_bcd(h)),
+        }
+    }
+
     /// Set the month (1-12)
     /// Will thrown an InvalidInputData error if the month is out of range.
     pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
@@ -285,6 +299,22 @@ mod tests {
     }
 
     #[test]
+    fn wrong_24h_hours_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_hours(Hours::H24(24)) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_24h_hours() {
+        let mut rtc = setup(&[0]);
+        rtc.set_hours(Hours::H24(23)).unwrap();
+        check_sent_data(rtc, &[Register::HOURS, 0b0010_0011]);
+    }
+
+    #[test]
     fn can_read_12h_am_hours() {
         let mut rtc = setup(&[0b0101_0010]);
         match rtc.get_hours().unwrap() {
@@ -295,6 +325,31 @@ mod tests {
     }
 
     #[test]
+    fn too_small_12h_am_hours_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_hours(Hours::AM(0)) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn too_big_12h_am_hours_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_hours(Hours::AM(13)) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_12h_am_hours() {
+        let mut rtc = setup(&[0]);
+        rtc.set_hours(Hours::AM(12)).unwrap();
+        check_sent_data(rtc, &[Register::HOURS, 0b0101_0010]);
+    }
+
+    #[test]
     fn can_read_12h_pm_hours() {
         let mut rtc = setup(&[0b0111_0010]);
         match rtc.get_hours().unwrap() {
@@ -302,6 +357,31 @@ mod tests {
             _ => panic!(),
         }
         check_sent_data(rtc, &[Register::HOURS]);
+    }
+
+    #[test]
+    fn too_small_12h_pm_hours_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_hours(Hours::PM(0)) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn too_big_12h_pm_hours_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_hours(Hours::PM(13)) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_12h_pm_hours() {
+        let mut rtc = setup(&[0]);
+        rtc.set_hours(Hours::PM(12)).unwrap();
+        check_sent_data(rtc, &[Register::HOURS, 0b0111_0010]);
     }
 
     #[test]
