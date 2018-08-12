@@ -22,9 +22,9 @@ Datasheet: [DS1307](https://datasheets.maximintegrated.com/en/ds/DS1307.pdf)
 
 ## Status
 
-- [ ] Read date/time
-- [ ] Set date/time in 24-hour format
-- [ ] Set date/time in 12-hour format
+- [x] Read date/time
+- [x] Set date/time in 24-hour format
+- [x] Set date/time in 12-hour format
 - [ ] Enable/disable clock
 - [ ] Access to user RAM.
 - [ ] Control square-wave output
