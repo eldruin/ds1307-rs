@@ -14,6 +14,18 @@ use hal::blocking::i2c::{Write, WriteRead};
 pub enum Error<E> {
     /// I²C bus error
     I2C(E),
+    /// Internal error. Please report this if it ever happens.
+    InternalError
+}
+
+/// Hours in either 12-hour (AM/PM) or 24-hour format
+pub enum Hours {
+    /// AM (1-12)
+    AM(u8),
+    /// PM (1-12)
+    PM(u8),
+    /// 24H format (00-23)
+    H24(u8),
 }
 
 const DEVICE_ADDRESS: u8 = 0b110_1000;
@@ -56,6 +68,27 @@ where
             .write_read(DEVICE_ADDRESS, &[0x01], &mut data)
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
     }
+
+    /// Reads the hours
+    pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
+        let mut data = [0];
+        if let Err(e) = self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x02], &mut data)
+            .map_err(Error::I2C) {
+            return Err(e);
+        }
+        match (data[0] & 0b0100_0000) >> 6 {
+            0 => Ok(Hours::H24(packed_bcd_to_decimal(data[0] & 0b0011_1111))),
+            1 => match (data[0] & 0b0010_0000) >> 5 {
+                0 => Ok(Hours::AM(packed_bcd_to_decimal(data[0] & 0b0001_1111))),
+                1 => Ok(Hours::PM(packed_bcd_to_decimal(data[0] & 0b0001_1111))),
+                _ => Err(Error::InternalError),
+            },
+            _ => Err(Error::InternalError),
+        }
+    }
+
+
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -109,6 +142,36 @@ mod tests {
         let mut rtc = setup(&[0b0101_1001]);
         assert_eq!(59, rtc.get_minutes().unwrap());
         check_sent_data(rtc, &[0x01]);
+    }
+
+    #[test]
+    fn can_read_24h_hours() {
+        let mut rtc = setup(&[0b0010_0011]);
+        match rtc.get_hours().unwrap() {
+            Hours::H24(h) => assert_eq!(23, h),
+            _ => panic!(),
+        }
+        check_sent_data(rtc, &[0x02]);
+    }
+
+    #[test]
+    fn can_read_12h_am_hours() {
+        let mut rtc = setup(&[0b0101_0010]);
+        match rtc.get_hours().unwrap() {
+            Hours::AM(h) => assert_eq!(12, h),
+            _ => panic!(),
+        }
+        check_sent_data(rtc, &[0x02]);
+    }
+
+    #[test]
+    fn can_read_12h_pm_hours() {
+        let mut rtc = setup(&[0b0111_0010]);
+        match rtc.get_hours().unwrap() {
+            Hours::PM(h) => assert_eq!(12, h),
+            _ => panic!(),
+        }
+        check_sent_data(rtc, &[0x02]);
     }
 
     #[test]
