@@ -62,7 +62,7 @@ where
             .and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
     }
 
-    /// Reads the minutes
+    /// Read the minutes
     pub fn get_minutes(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
@@ -71,7 +71,7 @@ where
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
-    /// Reads the hours
+    /// Read the hours
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
         let mut data = [0];
         if let Err(e) = self.i2c
@@ -90,7 +90,7 @@ where
         }
     }
 
-    /// Reads the day of the week (1-7)
+    /// Read the day of the week (1-7)
     pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
@@ -99,7 +99,7 @@ where
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
-    /// Reads the day of the month (1-31)
+    /// Read the day of the month (1-31)
     pub fn get_day_of_month(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
@@ -108,7 +108,7 @@ where
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
-    /// Reads the month (1-12)
+    /// Read the month (1-12)
     pub fn get_month(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
@@ -117,7 +117,7 @@ where
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
-    /// Reads the year (2000-2099)
+    /// Read the year (2000-2099)
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let mut data = [0];
         self.i2c
