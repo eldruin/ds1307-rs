@@ -165,6 +165,15 @@ where
         self.write_register(Register::DOW, day_of_week)
     }
 
+    /// Set the day of month (1-31)
+    /// Will thrown an InvalidInputData error if the day is out of range.
+    pub fn set_day_of_month(&mut self, day_of_month: u8) -> Result<(), Error<E>> {
+        if day_of_month < 1 || day_of_month > 7 {
+            return Err(Error::InvalidInputData);
+        }
+        self.write_register(Register::DOM, day_of_month)
+    }
+
     /// Set the month (1-12)
     /// Will thrown an InvalidInputData error if the month is out of range.
     pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
