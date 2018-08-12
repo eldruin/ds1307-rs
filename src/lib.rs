@@ -166,11 +166,7 @@ where
         if minutes > 59 {
             return Err(Error::InvalidInputData);
         }
-        let payload: [u8; 2] = [Register::MINUTES,
-                                decimal_to_packed_bcd(minutes)];
-        self.i2c
-            .write(DEVICE_ADDRESS, &payload)
-            .map_err(Error::I2C)
+        self.write_register(Register::MINUTES, minutes)
     }
 
     /// Set the month (1-12)
@@ -179,11 +175,7 @@ where
         if month < 1 || month > 12 {
             return Err(Error::InvalidInputData);
         }
-        let payload: [u8; 2] = [Register::MONTH,
-                                decimal_to_packed_bcd(month)];
-        self.i2c
-            .write(DEVICE_ADDRESS, &payload)
-            .map_err(Error::I2C)
+        self.write_register(Register::MONTH, month)
     }
 
     /// Set the year (2000-2099)
@@ -192,8 +184,12 @@ where
         if year < 2000 || year > 2099 {
             return Err(Error::InvalidInputData);
         }
-        let payload: [u8; 2] = [Register::YEAR,
-                                decimal_to_packed_bcd((year - 2000) as u8)];
+        self.write_register(Register::YEAR, (year - 2000) as u8)
+    }
+
+    fn write_register(&mut self, register: u8, decimal_number: u8) -> Result<(), Error<E>> {
+        let payload: [u8; 2] = [register,
+                                decimal_to_packed_bcd(decimal_number)];
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
