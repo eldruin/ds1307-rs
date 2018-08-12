@@ -103,6 +103,14 @@ where
             .write_read(DEVICE_ADDRESS, &[0x04], &mut data)
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
     }
+
+    /// Reads the month (1-12)
+    pub fn get_month(&mut self) -> Result<u8, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x05], &mut data)
+            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -200,6 +208,13 @@ mod tests {
         let mut rtc = setup(&[0b0011_0001]);
         assert_eq!(31, rtc.get_day_of_month().unwrap());
         check_sent_data(rtc, &[0x04]);
+    }
+
+    #[test]
+    fn can_read_month() {
+        let mut rtc = setup(&[0b0001_0010]);
+        assert_eq!(12, rtc.get_month().unwrap());
+        check_sent_data(rtc, &[0x05]);
     }
 
     #[test]
