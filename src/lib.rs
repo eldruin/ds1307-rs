@@ -172,6 +172,19 @@ where
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
     }
+
+    /// Set the month (1-12)
+    /// Will thrown an InvalidInputData error if the month is out of range.
+    pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
+        if month < 1 || month > 12 {
+            return Err(Error::InvalidInputData);
+        }
+        let payload: [u8; 2] = [Register::MONTH,
+                                decimal_to_packed_bcd(month)];
+        self.i2c
+            .write(DEVICE_ADDRESS, &payload)
+            .map_err(Error::I2C)
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -321,6 +334,31 @@ mod tests {
         let mut rtc = setup(&[0b0001_0010]);
         assert_eq!(12, rtc.get_month().unwrap());
         check_sent_data(rtc, &[Register::MONTH]);
+    }
+
+    #[test]
+    fn too_small_month_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_month(0) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn too_big_month_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_month(13) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_month() {
+        let mut rtc = setup(&[0]);
+        rtc.set_month(12).unwrap();
+        check_sent_data(rtc, &[Register::MONTH, 0b0001_0010]);
     }
 
     #[test]
