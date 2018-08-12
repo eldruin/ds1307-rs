@@ -146,6 +146,18 @@ where
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
     }
+
+    /// Set the minutes (0-59)
+    /// Will thrown an InvalidInputData error if the minutes are out of range.
+    pub fn set_minutes(&mut self, minutes: u8) -> Result<(), Error<E>> {
+        if minutes > 59 {
+            return Err(Error::InvalidInputData);
+        }
+        let payload: [u8; 2] = [0, decimal_to_packed_bcd(minutes)];
+        self.i2c
+            .write(DEVICE_ADDRESS, &payload)
+            .map_err(Error::I2C)
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -228,6 +240,22 @@ mod tests {
         let mut rtc = setup(&[0b0101_1001]);
         assert_eq!(59, rtc.get_minutes().unwrap());
         check_sent_data(rtc, &[0x01]);
+    }
+
+    #[test]
+    fn wrong_minutes_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_minutes(60) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_minutes() {
+        let mut rtc = setup(&[0]);
+        rtc.set_minutes(59).unwrap();
+        check_sent_data(rtc, &[0, 0b0101_1001]);
     }
 
     #[test]
