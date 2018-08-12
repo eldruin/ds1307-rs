@@ -88,7 +88,13 @@ where
         }
     }
 
-
+    /// Reads the day of the week (0-7)
+    pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x03], &mut data)
+            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -136,7 +142,7 @@ mod tests {
         let mut rtc = setup(&[0b1101_1001]);
         assert_eq!(59, rtc.get_seconds().unwrap());
     }
-    
+
     #[test]
     fn can_read_minutes() {
         let mut rtc = setup(&[0b0101_1001]);
@@ -172,6 +178,13 @@ mod tests {
             _ => panic!(),
         }
         check_sent_data(rtc, &[0x02]);
+    }
+
+    #[test]
+    fn can_read_day_of_week() {
+        let mut rtc = setup(&[7]);
+        assert_eq!(7, rtc.get_day_of_week().unwrap());
+        check_sent_data(rtc, &[0x03]);
     }
 
     #[test]
