@@ -58,7 +58,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
-            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
+            .map_err(Error::I2C)
+            .and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
     }
 
     /// Reads the minutes
@@ -66,7 +67,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x01], &mut data)
-            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+            .map_err(Error::I2C)
+            .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
     /// Reads the hours
@@ -93,7 +95,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x03], &mut data)
-            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+            .map_err(Error::I2C)
+            .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
     /// Reads the day of the month (1-31)
@@ -101,7 +104,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x04], &mut data)
-            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+            .map_err(Error::I2C)
+            .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
     /// Reads the month (1-12)
@@ -109,7 +113,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x05], &mut data)
-            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+            .map_err(Error::I2C)
+            .and(Ok(packed_bcd_to_decimal(data[0])))
     }
 
     /// Reads the year (2000-2099)
@@ -117,7 +122,8 @@ where
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x06], &mut data)
-            .map_err(Error::I2C).and(Ok(2000 + packed_bcd_to_decimal(data[0]) as u16))
+            .map_err(Error::I2C)
+            .and(Ok(2000 + packed_bcd_to_decimal(data[0]) as u16))
     }
 }
 
