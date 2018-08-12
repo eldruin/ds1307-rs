@@ -149,9 +149,12 @@ where
             Hours::H24(h) if h > 23 => Err(Error::InvalidInputData),
             Hours::H24(h) => self.write_register_decimal(Register::HOURS, h),
             Hours::AM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::AM(h) => self.write_register(Register::HOURS, 0b0100_0000 | decimal_to_packed_bcd(h)),
+            Hours::AM(h) => self.write_register(Register::HOURS,
+                                                BitFlags::H24_H12 | decimal_to_packed_bcd(h)),
             Hours::PM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::PM(h) => self.write_register(Register::HOURS, 0b0110_0000 | decimal_to_packed_bcd(h)),
+            Hours::PM(h) => self.write_register(Register::HOURS,
+                                                BitFlags::H24_H12 | BitFlags::AM_PM |
+                                                decimal_to_packed_bcd(h)),
         }
     }
 
