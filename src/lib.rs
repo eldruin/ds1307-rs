@@ -24,7 +24,7 @@ pub enum Hours {
     AM(u8),
     /// PM (1-12)
     PM(u8),
-    /// 24H format (00-23)
+    /// 24H format (0-23)
     H24(u8),
 }
 
@@ -110,6 +110,14 @@ where
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x05], &mut data)
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+    }
+
+    /// Reads the year (2000-2099)
+    pub fn get_year(&mut self) -> Result<u16, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x06], &mut data)
+            .map_err(Error::I2C).and(Ok(2000 + packed_bcd_to_decimal(data[0]) as u16))
     }
 }
 
@@ -215,6 +223,13 @@ mod tests {
         let mut rtc = setup(&[0b0001_0010]);
         assert_eq!(12, rtc.get_month().unwrap());
         check_sent_data(rtc, &[0x05]);
+    }
+
+    #[test]
+    fn can_read_year() {
+        let mut rtc = setup(&[0b1001_1001]);
+        assert_eq!(2099, rtc.get_year().unwrap());
+        check_sent_data(rtc, &[0x06]);
     }
 
     #[test]
