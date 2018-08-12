@@ -41,7 +41,7 @@ where
         self.i2c
     }
 
-    /// Reads the seconds counter
+    /// Reads the seconds
     pub fn get_seconds(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
@@ -49,6 +49,13 @@ where
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
     }
 
+    /// Reads the minutes
+    pub fn get_minutes(&mut self) -> Result<u8, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x01], &mut data)
+            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -95,6 +102,13 @@ mod tests {
     fn ch_bit_is_ignored() {
         let mut rtc = setup(&[0b1101_1001]);
         assert_eq!(59, rtc.get_seconds().unwrap());
+    }
+    
+    #[test]
+    fn can_read_minutes() {
+        let mut rtc = setup(&[0b0101_1001]);
+        assert_eq!(59, rtc.get_minutes().unwrap());
+        check_sent_data(rtc, &[0x01]);
     }
 
     #[test]
