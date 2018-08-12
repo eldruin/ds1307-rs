@@ -88,11 +88,19 @@ where
         }
     }
 
-    /// Reads the day of the week (0-7)
+    /// Reads the day of the week (1-7)
     pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x03], &mut data)
+            .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
+    }
+
+    /// Reads the day of the month (1-31)
+    pub fn get_day_of_month(&mut self) -> Result<u8, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x04], &mut data)
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(data[0])))
     }
 }
@@ -185,6 +193,13 @@ mod tests {
         let mut rtc = setup(&[7]);
         assert_eq!(7, rtc.get_day_of_week().unwrap());
         check_sent_data(rtc, &[0x03]);
+    }
+    
+    #[test]
+    fn can_read_day_of_month() {
+        let mut rtc = setup(&[0b0011_0001]);
+        assert_eq!(31, rtc.get_day_of_month().unwrap());
+        check_sent_data(rtc, &[0x04]);
     }
 
     #[test]
