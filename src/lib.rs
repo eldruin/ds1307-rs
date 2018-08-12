@@ -69,75 +69,66 @@ where
 
     /// Reads the seconds
     pub fn get_seconds(&mut self) -> Result<u8, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::SECONDS], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
+        match self.read_register(Register::SECONDS) {
+            Ok(data) => Ok(packed_bcd_to_decimal(remove_ch_bit(data))),
+            Err(e) => Err(e)
+        }
     }
 
     /// Read the minutes
     pub fn get_minutes(&mut self) -> Result<u8, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::MINUTES], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(packed_bcd_to_decimal(data[0])))
+        match self.read_register(Register::MINUTES) {
+            Ok(data) => Ok(packed_bcd_to_decimal(data)),
+            Err(e) => Err(e)
+        }
     }
 
     /// Read the hours
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
-        let mut data = [0];
-        if let Err(e) = self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::HOURS], &mut data)
-            .map_err(Error::I2C) {
-            return Err(e);
-        }
-        match (data[0] & 0b0100_0000) >> 6 {
-            0 => Ok(Hours::H24(packed_bcd_to_decimal(data[0] & 0b0011_1111))),
-            1 => match (data[0] & 0b0010_0000) >> 5 {
-                0 => Ok(Hours::AM(packed_bcd_to_decimal(data[0] & 0b0001_1111))),
-                1 => Ok(Hours::PM(packed_bcd_to_decimal(data[0] & 0b0001_1111))),
+        match self.read_register(Register::HOURS) {
+            Err(e) => Err(e),
+            Ok(data) => match (data & 0b0100_0000) >> 6 {
+                    0 => Ok(Hours::H24(packed_bcd_to_decimal(data & 0b0011_1111))),
+                    1 => match (data & 0b0010_0000) >> 5 {
+                        0 => Ok(Hours::AM(packed_bcd_to_decimal(data & 0b0001_1111))),
+                        1 => Ok(Hours::PM(packed_bcd_to_decimal(data & 0b0001_1111))),
+                        _ => Err(Error::InternalError),
+                    },
                 _ => Err(Error::InternalError),
-            },
-            _ => Err(Error::InternalError),
+                }
         }
     }
 
     /// Read the day of the week (1-7)
     pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::DOW], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(packed_bcd_to_decimal(data[0])))
+        match self.read_register(Register::DOW) {
+            Ok(data) => Ok(packed_bcd_to_decimal(data)),
+            Err(e) => Err(e)
+        }
     }
 
     /// Read the day of the month (1-31)
     pub fn get_day_of_month(&mut self) -> Result<u8, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::DOM], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(packed_bcd_to_decimal(data[0])))
+        match self.read_register(Register::DOM) {
+            Ok(data) => Ok(packed_bcd_to_decimal(data)),
+            Err(e) => Err(e)
+        }
     }
 
     /// Read the month (1-12)
     pub fn get_month(&mut self) -> Result<u8, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::MONTH], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(packed_bcd_to_decimal(data[0])))
+        match self.read_register(Register::MONTH) {
+            Ok(data) => Ok(packed_bcd_to_decimal(data)),
+            Err(e) => Err(e)
+        }
     }
 
     /// Read the year (2000-2099)
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
-        let mut data = [0];
-        self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::YEAR], &mut data)
-            .map_err(Error::I2C)
-            .and(Ok(2000 + packed_bcd_to_decimal(data[0]) as u16))
+        match self.read_register(Register::YEAR) {
+            Ok(data) => Ok(2000 + (packed_bcd_to_decimal(data) as u16)),
+            Err(e) => Err(e)
+        }
     }
     
     /// Set the seconds (0-59)
@@ -193,6 +184,14 @@ where
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
+    }
+
+    fn read_register(&mut self, register: u8) -> Result<u8, Error<E>> {
+        let mut data = [0];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[register], &mut data)
+            .map_err(Error::I2C)
+            .and(Ok(data[0]))
     }
 }
 
