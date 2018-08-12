@@ -30,6 +30,18 @@ pub enum Hours {
     H24(u8),
 }
 
+struct Register;
+
+impl Register {
+    const SECONDS : u8 = 0x00;
+    const MINUTES : u8 = 0x01;
+    const HOURS   : u8 = 0x02;
+    const DOW     : u8 = 0x03;
+    const DOM     : u8 = 0x04;
+    const MONTH   : u8 = 0x05;
+    const YEAR    : u8 = 0x06;
+}
+
 const DEVICE_ADDRESS: u8 = 0b110_1000;
 
 /// DS1307 driver
@@ -59,7 +71,7 @@ where
     pub fn get_seconds(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::SECONDS], &mut data)
             .map_err(Error::I2C)
             .and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
     }
@@ -68,7 +80,7 @@ where
     pub fn get_minutes(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x01], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::MINUTES], &mut data)
             .map_err(Error::I2C)
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
@@ -77,7 +89,7 @@ where
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
         let mut data = [0];
         if let Err(e) = self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x02], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::HOURS], &mut data)
             .map_err(Error::I2C) {
             return Err(e);
         }
@@ -96,7 +108,7 @@ where
     pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x03], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::DOW], &mut data)
             .map_err(Error::I2C)
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
@@ -105,7 +117,7 @@ where
     pub fn get_day_of_month(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x04], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::DOM], &mut data)
             .map_err(Error::I2C)
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
@@ -114,7 +126,7 @@ where
     pub fn get_month(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x05], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::MONTH], &mut data)
             .map_err(Error::I2C)
             .and(Ok(packed_bcd_to_decimal(data[0])))
     }
@@ -123,7 +135,7 @@ where
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x06], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::YEAR], &mut data)
             .map_err(Error::I2C)
             .and(Ok(2000 + packed_bcd_to_decimal(data[0]) as u16))
     }
@@ -137,11 +149,12 @@ where
         // needs to keep the CH bit status so we read it first
         let mut data = [0];
         if let Err(e) = self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
+            .write_read(DEVICE_ADDRESS, &[Register::SECONDS], &mut data)
             .map_err(Error::I2C) {
             return Err(e);
         }
-        let payload: [u8; 2] = [0x00, data[0] & 0x80 | decimal_to_packed_bcd(seconds)];
+        let payload: [u8; 2] = [Register::SECONDS,
+                                data[0] & 0x80 | decimal_to_packed_bcd(seconds)];
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
@@ -153,7 +166,8 @@ where
         if minutes > 59 {
             return Err(Error::InvalidInputData);
         }
-        let payload: [u8; 2] = [0x01, decimal_to_packed_bcd(minutes)];
+        let payload: [u8; 2] = [Register::MINUTES,
+                                decimal_to_packed_bcd(minutes)];
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
@@ -225,21 +239,21 @@ mod tests {
     fn can_write_seconds() {
         let mut rtc = setup(&[0]);
         rtc.set_seconds(59).unwrap();
-        check_sent_data(rtc, &[0, 0b0101_1001]);
+        check_sent_data(rtc, &[Register::SECONDS, 0b0101_1001]);
     }
     
     #[test]
     fn ch_bit_is_kept_when_writing_seconds() {
         let mut rtc = setup(&[0b1000_0000]);
         rtc.set_seconds(59).unwrap();
-        check_sent_data(rtc, &[0, 0b1101_1001]);
+        check_sent_data(rtc, &[Register::SECONDS, 0b1101_1001]);
     }
 
     #[test]
     fn can_read_minutes() {
         let mut rtc = setup(&[0b0101_1001]);
         assert_eq!(59, rtc.get_minutes().unwrap());
-        check_sent_data(rtc, &[0x01]);
+        check_sent_data(rtc, &[Register::MINUTES]);
     }
 
     #[test]
@@ -255,7 +269,7 @@ mod tests {
     fn can_write_minutes() {
         let mut rtc = setup(&[0]);
         rtc.set_minutes(59).unwrap();
-        check_sent_data(rtc, &[0x01, 0b0101_1001]);
+        check_sent_data(rtc, &[Register::MINUTES, 0b0101_1001]);
     }
 
     #[test]
@@ -265,7 +279,7 @@ mod tests {
             Hours::H24(h) => assert_eq!(23, h),
             _ => panic!(),
         }
-        check_sent_data(rtc, &[0x02]);
+        check_sent_data(rtc, &[Register::HOURS]);
     }
 
     #[test]
@@ -275,7 +289,7 @@ mod tests {
             Hours::AM(h) => assert_eq!(12, h),
             _ => panic!(),
         }
-        check_sent_data(rtc, &[0x02]);
+        check_sent_data(rtc, &[Register::HOURS]);
     }
 
     #[test]
@@ -285,35 +299,35 @@ mod tests {
             Hours::PM(h) => assert_eq!(12, h),
             _ => panic!(),
         }
-        check_sent_data(rtc, &[0x02]);
+        check_sent_data(rtc, &[Register::HOURS]);
     }
 
     #[test]
     fn can_read_day_of_week() {
         let mut rtc = setup(&[7]);
         assert_eq!(7, rtc.get_day_of_week().unwrap());
-        check_sent_data(rtc, &[0x03]);
+        check_sent_data(rtc, &[Register::DOW]);
     }
     
     #[test]
     fn can_read_day_of_month() {
         let mut rtc = setup(&[0b0011_0001]);
         assert_eq!(31, rtc.get_day_of_month().unwrap());
-        check_sent_data(rtc, &[0x04]);
+        check_sent_data(rtc, &[Register::DOM]);
     }
 
     #[test]
     fn can_read_month() {
         let mut rtc = setup(&[0b0001_0010]);
         assert_eq!(12, rtc.get_month().unwrap());
-        check_sent_data(rtc, &[0x05]);
+        check_sent_data(rtc, &[Register::MONTH]);
     }
 
     #[test]
     fn can_read_year() {
         let mut rtc = setup(&[0b1001_1001]);
         assert_eq!(2099, rtc.get_year().unwrap());
-        check_sent_data(rtc, &[0x06]);
+        check_sent_data(rtc, &[Register::YEAR]);
     }
 
     #[test]
