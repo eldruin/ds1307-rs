@@ -40,7 +40,7 @@ where
     pub fn destroy(self) -> I2C {
         self.i2c
     }
-    
+
     /// Reads the seconds counter
     pub fn get_seconds(&mut self) -> Result<u8, Error<E>> {
         let mut data = [0];
@@ -48,6 +48,7 @@ where
             .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
             .map_err(Error::I2C).and(Ok(packed_bcd_to_decimal(remove_ch_bit(data[0]))))
     }
+
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -65,14 +66,29 @@ mod tests {
 
     use super::*;
 
-    fn setup<'a>() -> DS1307<hal::I2cMock<'a>> {
-        let dev = hal::I2cMock::new();
+    fn setup<'a>(read_data: &'a [u8]) -> DS1307<hal::I2cMock<'a>> {
+        let mut dev = hal::I2cMock::new();
+        dev.set_read_data(&read_data);
         DS1307::new(dev)
     }
 
+    fn check_sent_data(rtc: DS1307<hal::I2cMock>, data: &[u8]) {
+        let dev = rtc.destroy();
+        assert_eq!(dev.get_last_address(), Some(DEVICE_ADDRESS));
+        assert_eq!(dev.get_write_data(), &data[..]);
+    }
+
     #[test]
-    fn can_create() {
-        let _controller = setup();
+    fn sends_correct_data_for_seconds_read() {
+        let mut rtc = setup(&[0]);
+        rtc.get_seconds().unwrap();
+        check_sent_data(rtc, &[0]);
+    }
+
+    #[test]
+    fn can_read_seconds() {
+        let mut rtc = setup(&[0b0101_1001]);
+        assert_eq!(59, rtc.get_seconds().unwrap());
     }
     
     #[test]
