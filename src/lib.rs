@@ -16,8 +16,6 @@ pub enum Error<E> {
     I2C(E),
     /// Invalid input data.
     InvalidInputData,
-    /// Internal error. Please report this if it ever happens.
-    InternalError,
 }
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
