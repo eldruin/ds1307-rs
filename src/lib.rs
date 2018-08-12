@@ -185,6 +185,19 @@ where
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
     }
+
+    /// Set the year (2000-2099)
+    /// Will thrown an InvalidInputData error if the year is out of range.
+    pub fn set_year(&mut self, year: u16) -> Result<(), Error<E>> {
+        if year < 2000 || year > 2099 {
+            return Err(Error::InvalidInputData);
+        }
+        let payload: [u8; 2] = [Register::YEAR,
+                                decimal_to_packed_bcd((year - 2000) as u8)];
+        self.i2c
+            .write(DEVICE_ADDRESS, &payload)
+            .map_err(Error::I2C)
+    }
 }
 
 fn remove_ch_bit(value: u8) -> u8 {
@@ -366,6 +379,31 @@ mod tests {
         let mut rtc = setup(&[0b1001_1001]);
         assert_eq!(2099, rtc.get_year().unwrap());
         check_sent_data(rtc, &[Register::YEAR]);
+    }
+
+    #[test]
+    fn too_small_year_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_year(1999) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn too_big_year_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_year(2100) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_year() {
+        let mut rtc = setup(&[0]);
+        rtc.set_year(2099).unwrap();
+        check_sent_data(rtc, &[Register::YEAR, 0b1001_1001]);
     }
 
     #[test]
