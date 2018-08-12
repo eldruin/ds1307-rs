@@ -90,7 +90,13 @@ mod tests {
         let mut rtc = setup(&[0b0101_1001]);
         assert_eq!(59, rtc.get_seconds().unwrap());
     }
-    
+
+    #[test]
+    fn ch_bit_is_ignored() {
+        let mut rtc = setup(&[0b1101_1001]);
+        assert_eq!(59, rtc.get_seconds().unwrap());
+    }
+
     #[test]
     fn can_convert_packed_bcd_to_decimal() {
         assert_eq!(0,  packed_bcd_to_decimal(0b0000_0000));
