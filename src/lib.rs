@@ -141,7 +141,7 @@ where
             .map_err(Error::I2C) {
             return Err(e);
         }
-        let payload: [u8; 2] = [0, data[0] & 0x80 | decimal_to_packed_bcd(seconds)];
+        let payload: [u8; 2] = [0x00, data[0] & 0x80 | decimal_to_packed_bcd(seconds)];
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
@@ -153,7 +153,7 @@ where
         if minutes > 59 {
             return Err(Error::InvalidInputData);
         }
-        let payload: [u8; 2] = [0, decimal_to_packed_bcd(minutes)];
+        let payload: [u8; 2] = [0x01, decimal_to_packed_bcd(minutes)];
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
@@ -255,7 +255,7 @@ mod tests {
     fn can_write_minutes() {
         let mut rtc = setup(&[0]);
         rtc.set_minutes(59).unwrap();
-        check_sent_data(rtc, &[0, 0b0101_1001]);
+        check_sent_data(rtc, &[0x01, 0b0101_1001]);
     }
 
     #[test]
