@@ -42,6 +42,14 @@ impl Register {
     const YEAR    : u8 = 0x06;
 }
 
+struct BitFlags;
+
+impl BitFlags {
+    const H24_H12 : u8 = 0b0100_0000;
+    const AM_PM   : u8 = 0b0010_0000;
+    const CH      : u8 = 0b1000_0000;
+}
+
 const DEVICE_ADDRESS: u8 = 0b110_1000;
 
 /// DS1307 driver
@@ -81,14 +89,14 @@ where
     /// Read the hours
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
         let data = self.read_register(Register::HOURS)?;
-        match (data & 0b0100_0000) >> 6 {
-            0 => Ok(Hours::H24(packed_bcd_to_decimal(data & 0b0011_1111))),
-            1 => match (data & 0b0010_0000) >> 5 {
-                0 => Ok(Hours::AM(packed_bcd_to_decimal(data & 0b0001_1111))),
-                1 => Ok(Hours::PM(packed_bcd_to_decimal(data & 0b0001_1111))),
-                _ => Err(Error::InternalError),
-            },
-        _ => Err(Error::InternalError),
+        if is_24h_format(data) {        
+            Ok(Hours::H24(packed_bcd_to_decimal(data & !BitFlags::H24_H12)))
+        }
+        else if is_am(data) {
+            Ok(Hours::AM(packed_bcd_to_decimal(data & !(BitFlags::H24_H12 | BitFlags::AM_PM))))
+        }
+        else {
+            Ok(Hours::PM(packed_bcd_to_decimal(data & !(BitFlags::H24_H12 | BitFlags::AM_PM))))
         }
     }
 
@@ -121,7 +129,7 @@ where
         }
         // needs to keep the CH bit status so we read it first
         let data = self.read_register(Register::SECONDS)?;
-        self.write_register(Register::SECONDS, data & 0x80 | decimal_to_packed_bcd(seconds))
+        self.write_register(Register::SECONDS, data & BitFlags::CH | decimal_to_packed_bcd(seconds))
     }
 
     /// Set the minutes (0-59)
@@ -190,8 +198,16 @@ where
     }
 }
 
+fn is_24h_format(hours_data: u8) -> bool {
+    hours_data & BitFlags::H24_H12 == 0
+}
+
+fn is_am(hours_data: u8) -> bool {
+    hours_data & BitFlags::AM_PM == 0
+}
+
 fn remove_ch_bit(value: u8) -> u8 {
-    value & 0x7F
+    value & !BitFlags::CH
 }
 
 /// Transforms a number in packed BCD format to decimal
