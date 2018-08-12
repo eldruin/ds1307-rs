@@ -158,6 +158,15 @@ where
         }
     }
 
+    /// Set the day of week (1-7)
+    /// Will thrown an InvalidInputData error if the day is out of range.
+    pub fn set_day_of_week(&mut self, day_of_week: u8) -> Result<(), Error<E>> {
+        if day_of_week < 1 || day_of_week > 7 {
+            return Err(Error::InvalidInputData);
+        }
+        self.write_register(Register::DOW, day_of_week)
+    }
+
     /// Set the month (1-12)
     /// Will thrown an InvalidInputData error if the month is out of range.
     pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
@@ -408,6 +417,31 @@ mod tests {
         let mut rtc = setup(&[7]);
         assert_eq!(7, rtc.get_day_of_week().unwrap());
         check_sent_data(rtc, &[Register::DOW]);
+    }
+
+    #[test]
+    fn too_small_day_of_week_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_day_of_week(0) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn too_big_day_of_week_returns_error() {
+        let mut rtc = setup(&[0]);
+        match rtc.set_day_of_week(8) {
+            Err(Error::InvalidInputData) => (),
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn can_write_day_of_week() {
+        let mut rtc = setup(&[0]);
+        rtc.set_day_of_week(7).unwrap();
+        check_sent_data(rtc, &[Register::DOW, 0b0000_0111]);
     }
     
     #[test]
