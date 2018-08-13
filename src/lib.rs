@@ -116,12 +116,12 @@ where
     }
 
     /// Read the day of the week (1-7)
-    pub fn get_day_of_week(&mut self) -> Result<u8, Error<E>> {
+    pub fn get_weekday(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOW)
     }
 
     /// Read the day of the month (1-31)
-    pub fn get_day_of_month(&mut self) -> Result<u8, Error<E>> {
+    pub fn get_day(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOM)
     }
 
@@ -175,20 +175,20 @@ where
 
     /// Set the day of week (1-7)
     /// Will thrown an InvalidInputData error if the day is out of range.
-    pub fn set_day_of_week(&mut self, day_of_week: u8) -> Result<(), Error<E>> {
-        if day_of_week < 1 || day_of_week > 7 {
+    pub fn set_weekday(&mut self, weekday: u8) -> Result<(), Error<E>> {
+        if weekday < 1 || weekday > 7 {
             return Err(Error::InvalidInputData);
         }
-        self.write_register(Register::DOW, day_of_week)
+        self.write_register(Register::DOW, weekday)
     }
 
     /// Set the day of month (1-31)
     /// Will thrown an InvalidInputData error if the day is out of range.
-    pub fn set_day_of_month(&mut self, day_of_month: u8) -> Result<(), Error<E>> {
-        if day_of_month < 1 || day_of_month > 7 {
+    pub fn set_day(&mut self, day: u8) -> Result<(), Error<E>> {
+        if day < 1 || day > 7 {
             return Err(Error::InvalidInputData);
         }
-        self.write_register(Register::DOM, day_of_month)
+        self.write_register(Register::DOM, day)
     }
 
     /// Set the month (1-12)
