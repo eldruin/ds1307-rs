@@ -45,6 +45,24 @@ pub enum Hours {
     H24(u8),
 }
 
+/// Date and time
+pub struct DateTime {
+    /// Year (2000 - 2099)
+    pub year    : u16,
+    /// Month (1-12)
+    pub month   : u8,
+    /// Day (1-31)
+    pub day     : u8,
+    /// Weekday (1-7)
+    pub weekday : u8,
+    /// Hour in 24h/12h format
+    pub hour    : Hours,
+    /// Minute (0-59)
+    pub minute  : u8,
+    /// Second (0-59)
+    pub second  : u8,
+}
+
 struct Register;
 
 impl Register {
@@ -104,6 +122,10 @@ where
     /// Read the hours
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
         let data = self.read_register(Register::HOURS)?;
+        self.get_hours_from_register(data)
+    }
+
+    fn get_hours_from_register(&self, data: u8) -> Result<Hours, Error<E>> {
         if is_24h_format(data) {        
             Ok(Hours::H24(packed_bcd_to_decimal(data & !BitFlags::H24_H12)))
         }
@@ -134,6 +156,23 @@ where
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let year = self.read_register_decimal(Register::YEAR)?;
         Ok(2000 + (year as u16))
+    }
+
+    /// Read the date and time
+    pub fn get_datetime(&mut self) -> Result<DateTime, Error<E>> {
+        let mut data = [0u8; 7];
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
+            .map_err(Error::I2C)?;
+        Ok(DateTime {
+            year:    2000 + (packed_bcd_to_decimal(data[Register::YEAR as usize]) as u16),
+            month:   packed_bcd_to_decimal(data[Register::MONTH as usize]),
+            day:     packed_bcd_to_decimal(data[Register::DOM as usize]),
+            weekday:  packed_bcd_to_decimal(data[Register::DOW as usize]),
+            hour:    self.get_hours_from_register(data[Register::HOURS as usize])?,
+            minute:  packed_bcd_to_decimal(data[Register::MINUTES as usize]),
+            second:  packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]))
+        })
     }
     
     /// Set the seconds (0-59)
