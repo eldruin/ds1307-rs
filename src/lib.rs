@@ -17,6 +17,96 @@
 //! Timekeeping operation continues while the part operates from the backup supply.
 //!
 //! Datasheet: [DS1307](https://datasheets.maximintegrated.com/en/ds/DS1307.pdf)
+//!
+//! ## Get the year
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::DS1307;
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//! let year = rtc.get_year().unwrap();
+//! println!("Year: {}", year);
+//! # }
+//! ```
+//!
+//! ## Set the year
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::DS1307;
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//! rtc.set_year(2018).unwrap();
+//! # }
+//! ```
+//!
+//! ## Set the current date and time
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::{DS1307, DateTime, Hours};
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//! let datetime = DateTime {
+//!                           year: 2018,
+//!                           month: 08,
+//!                           day: 15,
+//!                           weekday: 4,
+//!                           hour: Hours::H24(19),
+//!                           minute: 59,
+//!                           second: 58
+//!                };
+//! rtc.set_datetime(&datetime).unwrap();
+//! # }
+//! ```
+//!
+//! ## Get the current date and time
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::{DS1307, Hours};
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//!
+//! let datetime = rtc.get_datetime().unwrap();
+//!
+//! // The hours depend on the RTC running mode
+//! match datetime.hour {
+//!     Hours::H24(h) => println!("{}-{}-{}, {} {}:{}:{}", datetime.year,
+//!                               datetime.month, datetime.day, datetime.weekday,
+//!                               h, datetime.minute, datetime.second),
+//!     Hours::AM(h) => println!("{}-{}-{}, {} {}:{}:{} AM", datetime.year,
+//!                               datetime.month, datetime.day, datetime.weekday,
+//!                               h, datetime.minute, datetime.second),
+//!     Hours::PM(h) => println!("{}-{}-{}, {} {}:{}:{} PM", datetime.year,
+//!                               datetime.month, datetime.day, datetime.weekday,
+//!                               h, datetime.minute, datetime.second),
+//! }
+//! // This will print something like: 2018-08-15, 4 19:59:58
+//! # }
+//! ```
+
 
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
