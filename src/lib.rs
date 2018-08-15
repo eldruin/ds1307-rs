@@ -199,16 +199,18 @@ where
     /// Changes the operating mode to 12h/24h depending on the parameter
     /// Will thrown an InvalidInputData error if the hours are out of range.
     pub fn set_hours(&mut self, hours: Hours) -> Result<(), Error<E>> {
-        match hours {
+        let value = self.get_hours_register_value(&hours)?;
+        self.write_register(Register::HOURS, value)
+    }
+
+    fn get_hours_register_value(&mut self, hours: &Hours) -> Result<u8, Error<E>> {
+        match *hours {
             Hours::H24(h) if h > 23 => Err(Error::InvalidInputData),
-            Hours::H24(h) => self.write_register_decimal(Register::HOURS, h),
+            Hours::H24(h) => Ok(decimal_to_packed_bcd(h)),
             Hours::AM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::AM(h) => self.write_register(Register::HOURS,
-                                                BitFlags::H24_H12 | decimal_to_packed_bcd(h)),
+            Hours::AM(h) =>  Ok(BitFlags::H24_H12 | decimal_to_packed_bcd(h)),
             Hours::PM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::PM(h) => self.write_register(Register::HOURS,
-                                                BitFlags::H24_H12 | BitFlags::AM_PM |
-                                                decimal_to_packed_bcd(h)),
+            Hours::PM(h) =>  Ok(BitFlags::H24_H12 | BitFlags::AM_PM | decimal_to_packed_bcd(h)),
         }
     }
 
