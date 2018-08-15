@@ -250,6 +250,30 @@ where
         self.write_register_decimal(Register::YEAR, (year - 2000) as u8)
     }
 
+    /// Set the date and time
+    /// Will thrown an InvalidInputData error if any of the parameters is out of range.
+    pub fn set_datetime(&mut self, datetime: &DateTime) -> Result<(), Error<E>> {
+        if datetime.year < 2000 || datetime.year > 2099 ||
+           datetime.month < 1   || datetime.month > 12  ||
+           datetime.day < 1     || datetime.day > 31    ||
+           datetime.weekday < 1 || datetime.weekday > 7 ||
+           datetime.minute > 59 ||
+           datetime.second > 59 {
+            return Err(Error::InvalidInputData);
+        }
+        let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
+        let payload = [decimal_to_packed_bcd(datetime.second) | ch_flag,
+                       decimal_to_packed_bcd(datetime.minute),
+                       self.get_hours_register_value(&datetime.hour)?,
+                       decimal_to_packed_bcd(datetime.weekday),
+                       decimal_to_packed_bcd(datetime.day),
+                       decimal_to_packed_bcd(datetime.month),
+                       decimal_to_packed_bcd((datetime.year - 2000) as u8)];
+        self.i2c
+            .write(DEVICE_ADDRESS, &payload)
+            .map_err(Error::I2C)
+    }
+
     fn write_register_decimal(&mut self, register: u8, decimal_number: u8) -> Result<(), Error<E>> {
         self.write_register(register, decimal_to_packed_bcd(decimal_number))
     }
