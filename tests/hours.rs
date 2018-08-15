@@ -1,8 +1,8 @@
 extern crate ds1307;
-use ds1307::{Hours, Error};
+use ds1307::Hours;
 
 mod common;
-use common::{setup, check_sent_data};
+use common::{setup, check_sent_data, assert_invalid_input_data_error};
 
 const HOURS_REGISTER : u8 = 0x02;
 
@@ -19,10 +19,7 @@ fn can_read_24h_hours() {
 #[test]
 fn wrong_24h_hours_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_hours(Hours::H24(24)) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_hours(Hours::H24(24)));
 }
 
 #[test]
@@ -45,19 +42,13 @@ fn can_read_12h_am_hours() {
 #[test]
 fn too_small_12h_am_hours_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_hours(Hours::AM(0)) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_hours(Hours::AM(0)));
 }
 
 #[test]
 fn too_big_12h_am_hours_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_hours(Hours::AM(13)) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_hours(Hours::AM(13)));
 }
 
 #[test]
@@ -80,19 +71,13 @@ fn can_read_12h_pm_hours() {
 #[test]
 fn too_small_12h_pm_hours_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_hours(Hours::PM(0)) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_hours(Hours::PM(0)));
 }
 
 #[test]
 fn too_big_12h_pm_hours_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_hours(Hours::PM(13)) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_hours(Hours::PM(13)));
 }
 
 #[test]

@@ -1,8 +1,7 @@
 extern crate ds1307;
-use ds1307::Error;
 
 mod common;
-use common::{setup, check_sent_data};
+use common::{setup, check_sent_data, assert_invalid_input_data_error};
 
 const MONTH_REGISTER : u8 = 0x05;
 
@@ -16,19 +15,13 @@ fn can_read_month() {
 #[test]
 fn too_small_month_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_month(0) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_month(0));
 }
 
 #[test]
 fn too_big_month_returns_error() {
     let mut rtc = setup(&[0]);
-    match rtc.set_month(13) {
-        Err(Error::InvalidInputData) => (),
-        _ => panic!(),
-    }
+    assert_invalid_input_data_error(rtc.set_month(13));
 }
 
 #[test]
