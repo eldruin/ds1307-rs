@@ -1,4 +1,4 @@
-# Rust DS1307 Driver
+# Rust DS1307 Real-Time Clock Driver [![Docs](https://img.shields.io/crates/v/ds1307.svg)](https://crates.io/crates/ds1307) [![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307)
 
 This is a platform agnostic Rust driver for the DS1307 real-time clock,
 based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
