@@ -18,7 +18,8 @@
 //!
 //! Datasheet: [DS1307](https://datasheets.maximintegrated.com/en/ds/DS1307.pdf)
 //!
-//! ## Get the year
+//! ## Usage examples (see also examples folder)
+//! ### Get the year
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
@@ -35,7 +36,7 @@
 //! # }
 //! ```
 //!
-//! ## Set the year
+//! ### Set the year
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
@@ -51,7 +52,7 @@
 //! # }
 //! ```
 //!
-//! ## Set the current date and time
+//! ### Set the current date and time
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
@@ -76,7 +77,7 @@
 //! # }
 //! ```
 //!
-//! ## Get the current date and time
+//! ### Get the current date and time
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
@@ -196,6 +197,26 @@ where
     /// Destroy driver instance, return I²C bus instance.
     pub fn destroy(self) -> I2C {
         self.i2c
+    }
+
+    /// Reads if the clock is running
+    pub fn is_running(&mut self) -> Result<bool, Error<E>> {
+        let data = self.read_register(Register::SECONDS)?;
+        Ok(data & BitFlags::CH != 0)
+    }
+
+    /// Sets the clock to run (default on power-on)
+    pub fn set_running(&mut self) -> Result<(), Error<E>> {
+        // needs to keep the seconds so we read it first
+        let data = self.read_register(Register::SECONDS)?;
+        self.write_register(Register::SECONDS, data | BitFlags::CH)
+    }
+
+    /// Halts the clock
+    pub fn halt(&mut self) -> Result<(), Error<E>> {
+        // needs to keep the seconds so we read it first
+        let data = self.read_register(Register::SECONDS)?;
+        self.write_register(Register::SECONDS, data & !BitFlags::CH)
     }
 
     /// Reads the seconds
