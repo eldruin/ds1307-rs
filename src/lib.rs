@@ -107,7 +107,30 @@
 //! // This will print something like: 2018-08-15, 4 19:59:58
 //! # }
 //! ```
-
+//!
+//! ### Read and write user RAM
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::{DS1307};
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//! 
+//! let data = [171; 3];
+//! rtc.write_ram(2, &data).unwrap();
+//! 
+//! let mut data = [0; 3];
+//! rtc.read_ram(2, &mut data).unwrap();
+//! 
+//! println!("{}, {}, {}", data[0], data[1], data[2]);
+//! // This will print: 171, 171, 171
+//! # }
+//! ```
 
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
@@ -157,13 +180,15 @@ pub struct DateTime {
 struct Register;
 
 impl Register {
-    const SECONDS : u8 = 0x00;
-    const MINUTES : u8 = 0x01;
-    const HOURS   : u8 = 0x02;
-    const DOW     : u8 = 0x03;
-    const DOM     : u8 = 0x04;
-    const MONTH   : u8 = 0x05;
-    const YEAR    : u8 = 0x06;
+    const SECONDS   : u8 = 0x00;
+    const MINUTES   : u8 = 0x01;
+    const HOURS     : u8 = 0x02;
+    const DOW       : u8 = 0x03;
+    const DOM       : u8 = 0x04;
+    const MONTH     : u8 = 0x05;
+    const YEAR      : u8 = 0x06;
+    const RAM_BEGIN : u8 = 0x08;
+    const RAM_END   : u8 = 0x3F;
 }
 
 struct BitFlags;
@@ -174,7 +199,8 @@ impl BitFlags {
     const CH      : u8 = 0b1000_0000;
 }
 
-const DEVICE_ADDRESS: u8 = 0b110_1000;
+const DEVICE_ADDRESS: u8    = 0b110_1000;
+const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
 
 /// DS1307 driver
 #[derive(Debug, Default)]
@@ -383,6 +409,47 @@ where
         self.i2c
             .write(DEVICE_ADDRESS, &payload)
             .map_err(Error::I2C)
+    }
+
+    /// Reads a data array from the user RAM starting at the given offset.
+    /// There is a total of 56 bytes of user RAM available so the valid ranges for
+    /// the parameters are: address_offset: [0-55] and data length: [0-56].
+    /// Will return an InvalidInputData error if attempting to access a position not
+    /// available or if attempting to read too much data.
+    pub fn read_ram(&mut self, address_offset: u8, data: &mut [u8]) -> Result<(), Error<E>> {
+        if data.is_empty() {
+            return Ok(());
+        }
+        self.check_ram_parameters(address_offset, &data)?;
+        self.i2c
+            .write_read(DEVICE_ADDRESS, &[Register::RAM_BEGIN+address_offset], &mut data[..])
+            .map_err(Error::I2C)
+    }
+
+    /// Writes a data array to the user RAM starting at the given offset.
+    /// There is a total of 56 bytes of user RAM available so the valid ranges for
+    /// the parameters are: address_offset: [0-55] and data length: [0-56].
+    /// Will return an InvalidInputData error if attempting to access a position not
+    /// available or if attempting to write too much data.
+    pub fn write_ram(&mut self, address_offset: u8, data: &[u8]) -> Result<(), Error<E>> {
+        if data.is_empty() {
+            return Ok(());
+        }
+        self.check_ram_parameters(address_offset, &data)?;
+        let mut payload = [0; RAM_BYTE_COUNT + 1];
+        payload[0] = Register::RAM_BEGIN + address_offset;
+        payload[1..=data.len()].copy_from_slice(&data);
+        self.i2c
+            .write(DEVICE_ADDRESS, &payload[..=data.len()])
+            .map_err(Error::I2C)
+    }
+
+    fn check_ram_parameters(&self, address_offset: u8, data: &[u8]) -> Result<(), Error<E>> {
+        if address_offset >= RAM_BYTE_COUNT as u8
+            || (address_offset as usize + data.len()) > RAM_BYTE_COUNT {
+            return Err(Error::InvalidInputData);
+        }
+        Ok(())
     }
 
     fn write_register_decimal(&mut self, register: u8, decimal_number: u8) -> Result<(), Error<E>> {

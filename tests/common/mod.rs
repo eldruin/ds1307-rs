@@ -20,6 +20,6 @@ pub fn check_sent_data(rtc: DS1307<hal::I2cMock>, data: &[u8]) {
 pub fn assert_invalid_input_data_error<T, E>(result: Result<T, Error<E>>) {
     match result {
         Err(Error::InvalidInputData) => (),
-        _ => panic!(),
+        _ => panic!("Did not return Error::InvalidInputData."),
     }
 }
