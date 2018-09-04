@@ -187,6 +187,7 @@ impl Register {
     const DOM       : u8 = 0x04;
     const MONTH     : u8 = 0x05;
     const YEAR      : u8 = 0x06;
+    const SQWOUT    : u8 = 0x07;
     const RAM_BEGIN : u8 = 0x08;
     const RAM_END   : u8 = 0x3F;
 }
@@ -197,6 +198,7 @@ impl BitFlags {
     const H24_H12 : u8 = 0b0100_0000;
     const AM_PM   : u8 = 0b0010_0000;
     const CH      : u8 = 0b1000_0000;
+    const SQWE    : u8 = 0b0001_0000;
 }
 
 const DEVICE_ADDRESS: u8    = 0b110_1000;
@@ -450,6 +452,34 @@ where
             return Err(Error::InvalidInputData);
         }
         Ok(())
+    }
+
+    /// Read whether the square-wave output is enabled.
+    pub fn is_square_wave_output_enabled(&mut self) -> Result<bool, Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        Ok((data & BitFlags::SQWE) != 0)
+    }
+
+    /// Enable the square-wave output.
+    pub fn enable_square_wave_output(&mut self) -> Result<(), Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        if data & BitFlags::SQWE == 0 {
+            self.write_register(Register::SQWOUT, data | BitFlags::SQWE)
+        }
+        else {
+            Ok(())
+        }
+    }
+
+    /// Disaable the square-wave output.
+    pub fn disable_square_wave_output(&mut self) -> Result<(), Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        if data & BitFlags::SQWE != 0 {
+            self.write_register(Register::SQWOUT, data & !BitFlags::SQWE)
+        }
+        else {
+            Ok(())
+        }
     }
 
     fn write_register_decimal(&mut self, register: u8, decimal_number: u8) -> Result<(), Error<E>> {
