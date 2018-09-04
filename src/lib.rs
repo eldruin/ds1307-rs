@@ -413,7 +413,7 @@ where
             .map_err(Error::I2C)
     }
 
-    /// Reads a data array from the user RAM starting at the given offset.
+    /// Read a data array from the user RAM starting at the given offset.
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
     /// the parameters are: address_offset: [0-55] and data length: [0-56].
     /// Will return an InvalidInputData error if attempting to access a position not
@@ -428,7 +428,7 @@ where
             .map_err(Error::I2C)
     }
 
-    /// Writes a data array to the user RAM starting at the given offset.
+    /// Write a data array to the user RAM starting at the given offset.
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
     /// the parameters are: address_offset: [0-55] and data length: [0-56].
     /// Will return an InvalidInputData error if attempting to access a position not
@@ -471,7 +471,7 @@ where
         }
     }
 
-    /// Disaable the square-wave output.
+    /// Disable the square-wave output.
     pub fn disable_square_wave_output(&mut self) -> Result<(), Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         if data & BitFlags::SQWE != 0 {
