@@ -41,6 +41,7 @@
 //! println!("Year: {}", year);
 //! # }
 //! ```
+//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
 //!
 //! ### Set the year
 //!
@@ -57,8 +58,9 @@
 //! rtc.set_year(2018).unwrap();
 //! # }
 //! ```
+//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
 //!
-//! ### Set the current date and time
+//! ### Set the current date and time at once
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
@@ -83,7 +85,7 @@
 //! # }
 //! ```
 //!
-//! ### Get the current date and time
+//! ### Get the current date and time at once
 //!
 //! ```no_run
 //! extern crate linux_embedded_hal as hal;
