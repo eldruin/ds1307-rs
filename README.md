@@ -3,6 +3,12 @@
 This is a platform agnostic Rust driver for the DS1307 real-time clock,
 based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
 
+This driver allows you to:
+- Read and set date and time in 12-hour and 24-hour format. See: `get_datetime`
+- Enable and disable the real-time clock. See: `set_running`
+- Read and write user RAM. See: `read_ram`
+- Control square-wave output. See: `enable_square_wave_output`
+
 ## The device
 
 The DS1307 serial real-time clock (RTC) is a low-power, full binary-coded
@@ -19,15 +25,6 @@ automatically switches to the backup supply.
 Timekeeping operation continues while the part operates from the backup supply.
 
 Datasheet: [DS1307](https://datasheets.maximintegrated.com/en/ds/DS1307.pdf)
-
-## Status
-
-- [x] Read date/time
-- [x] Set date/time in 24-hour format
-- [x] Set date/time in 12-hour format
-- [x] Enable/disable clock
-- [x] Access to user RAM.
-- [ ] Control square-wave output
 
 ## License
 

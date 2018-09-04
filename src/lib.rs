@@ -1,6 +1,12 @@
 //! This is a platform agnostic Rust driver for the DS1307 real-time clock,
 //! based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
 //!
+//! This driver allows you to:
+//! - Read and set date and time in 12-hour and 24-hour format. See: `get_datetime`
+//! - Enable and disable the real-time clock. See: `set_running`
+//! - Read and write user RAM. See: `read_ram`
+//! - Control square-wave output. See: `enable_square_wave_output`
+//!
 //! ## The device
 //!
 //! The DS1307 serial real-time clock (RTC) is a low-power, full binary-coded
@@ -195,15 +201,26 @@ impl Register {
 struct BitFlags;
 
 impl BitFlags {
-    const H24_H12  : u8 = 0b0100_0000;
-    const AM_PM    : u8 = 0b0010_0000;
-    const CH       : u8 = 0b1000_0000;
-    const SQWE     : u8 = 0b0001_0000;
-    const OUTLEVEL : u8 = 0b1000_0000;
+    const H24_H12    : u8 = 0b0100_0000;
+    const AM_PM      : u8 = 0b0010_0000;
+    const CH         : u8 = 0b1000_0000;
+    const SQWE       : u8 = 0b0001_0000;
+    const OUTLEVEL   : u8 = 0b1000_0000;
+    const OUTRATERS0 : u8 = 0b0000_0001;
+    const OUTRATERS1 : u8 = 0b0000_0010;
 }
 
 const DEVICE_ADDRESS: u8    = 0b110_1000;
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
+
+/// Square-wave output rate bits
+#[derive(Debug, Clone)]
+pub struct SQWOUTRateBits {
+    /// Rate selection control bit 0
+    pub rs0 : bool,
+    /// Rate selection control bit 1
+    pub rs1 : bool,
+}
 
 /// DS1307 driver
 #[derive(Debug, Default)]
@@ -514,6 +531,34 @@ where
         }
         else {
             self.set_square_wave_output_level_low()
+        }
+    }
+
+    /// Read square-wave output rate control bits
+    pub fn get_square_wave_output_rate(&mut self) -> Result<SQWOUTRateBits, Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        Ok(SQWOUTRateBits{
+            rs0 : (data & BitFlags::OUTRATERS0) != 0,
+            rs1 : (data & BitFlags::OUTRATERS1) != 0,
+        })
+    }
+
+    /// Set square-wave output rate control bits
+    pub fn set_square_wave_output_rate(&mut self, rate_bits: SQWOUTRateBits) -> Result<(), Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        if rate_bits.rs0 != ((data & BitFlags::OUTRATERS0) != 0)
+            || rate_bits.rs1 != ((data & BitFlags::OUTRATERS1) != 0) {
+            let mut data = data & !(BitFlags::OUTRATERS0 | BitFlags::OUTRATERS1);
+            if rate_bits.rs0 {
+                data = data | BitFlags::OUTRATERS0;
+            }
+            if rate_bits.rs1 {
+                data = data | BitFlags::OUTRATERS1;
+            }
+            self.write_register(Register::SQWOUT, data)
+        }
+        else {
+            Ok(())
         }
     }
 
