@@ -195,10 +195,11 @@ impl Register {
 struct BitFlags;
 
 impl BitFlags {
-    const H24_H12 : u8 = 0b0100_0000;
-    const AM_PM   : u8 = 0b0010_0000;
-    const CH      : u8 = 0b1000_0000;
-    const SQWE    : u8 = 0b0001_0000;
+    const H24_H12  : u8 = 0b0100_0000;
+    const AM_PM    : u8 = 0b0010_0000;
+    const CH       : u8 = 0b1000_0000;
+    const SQWE     : u8 = 0b0001_0000;
+    const OUTLEVEL : u8 = 0b1000_0000;
 }
 
 const DEVICE_ADDRESS: u8    = 0b110_1000;
@@ -462,23 +463,57 @@ where
 
     /// Enable the square-wave output.
     pub fn enable_square_wave_output(&mut self) -> Result<(), Error<E>> {
-        let data = self.read_register(Register::SQWOUT)?;
-        if data & BitFlags::SQWE == 0 {
-            self.write_register(Register::SQWOUT, data | BitFlags::SQWE)
+        self.set_register_bit_flag(Register::SQWOUT, BitFlags::SQWE)
+    }
+
+    /// Disable the square-wave output.
+    pub fn disable_square_wave_output(&mut self) -> Result<(), Error<E>> {
+        self.clear_register_bit_flag(Register::SQWOUT, BitFlags::SQWE)
+    }
+
+    fn set_register_bit_flag(&mut self, address: u8, bitmask: u8) -> Result<(), Error<E>> {
+        let data = self.read_register(address)?;
+        if (data & bitmask) == 0 {
+            self.write_register(address, data | bitmask)
         }
         else {
             Ok(())
         }
     }
 
-    /// Disable the square-wave output.
-    pub fn disable_square_wave_output(&mut self) -> Result<(), Error<E>> {
-        let data = self.read_register(Register::SQWOUT)?;
-        if data & BitFlags::SQWE != 0 {
-            self.write_register(Register::SQWOUT, data & !BitFlags::SQWE)
+    fn clear_register_bit_flag(&mut self, address: u8, bitmask: u8) -> Result<(), Error<E>> {
+        let data = self.read_register(address)?;
+        if (data & bitmask) != 0 {
+            self.write_register(address, data & !bitmask)
         }
         else {
             Ok(())
+        }
+    }
+
+    /// Read status of square-wave output level control bit
+    pub fn get_square_wave_output_level(&mut self) -> Result<bool, Error<E>> {
+        let data = self.read_register(Register::SQWOUT)?;
+        Ok((data & BitFlags::OUTLEVEL) != 0)
+    }
+
+    /// Set square-wave output level high
+    pub fn set_square_wave_output_level_high(&mut self) -> Result<(), Error<E>> {
+        self.set_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
+    }
+
+    /// Set square-wave output level low
+    pub fn set_square_wave_output_level_low(&mut self) -> Result<(), Error<E>> {
+        self.clear_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
+    }
+
+    /// Set square-wave output level
+    pub fn set_square_wave_output_level(&mut self, should_level_be_high: bool) -> Result<(), Error<E>> {
+        if should_level_be_high {
+            self.set_square_wave_output_level_high()
+        }
+        else {
+            self.set_square_wave_output_level_low()
         }
     }
 
