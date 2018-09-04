@@ -139,6 +139,28 @@
 //! // This will print: 171, 171, 171
 //! # }
 //! ```
+//!
+//! ### Enable square-wave output and select rate
+//!
+//! ```no_run
+//! extern crate linux_embedded_hal as hal;
+//! extern crate ds1307;
+//!
+//! use hal::I2cdev;
+//! use ds1307::{DS1307, SQWOUTRateBits};
+//!
+//! # fn main() {
+//! let dev = I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = DS1307::new(dev);
+//!
+//! rtc.enable_square_wave_output().unwrap();
+//! let rate_bits = SQWOUTRateBits {
+//!     rs0: true,
+//!     rs1: false
+//! };
+//! rtc.set_square_wave_output_rate(rate_bits).unwrap();
+//! # }
+//! ```
 
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
