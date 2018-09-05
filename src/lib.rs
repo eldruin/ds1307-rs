@@ -263,18 +263,30 @@ where
         Ok(data & BitFlags::CH != 0)
     }
 
-    /// Sets the clock to run (default on power-on)
+    /// Sets the clock to run (default on power-on).
+    /// (Does not alter the device register if already running).
     pub fn set_running(&mut self) -> Result<(), Error<E>> {
         // needs to keep the seconds so we read it first
         let data = self.read_register(Register::SECONDS)?;
-        self.write_register(Register::SECONDS, data | BitFlags::CH)
+        if (data & BitFlags::CH) == 0 {
+            self.write_register(Register::SECONDS, data | BitFlags::CH)
+        }
+        else {
+            Ok(())
+        }
     }
 
-    /// Halts the clock
+    /// Halts the clock.
+    /// (Does not alter the device register if already halted).
     pub fn halt(&mut self) -> Result<(), Error<E>> {
         // needs to keep the seconds so we read it first
         let data = self.read_register(Register::SECONDS)?;
-        self.write_register(Register::SECONDS, data & !BitFlags::CH)
+        if (data & BitFlags::CH) != 0 {
+            self.write_register(Register::SECONDS, data & !BitFlags::CH)
+        }
+        else {
+            Ok(())
+        }
     }
 
     /// Reads the seconds
@@ -491,11 +503,13 @@ where
     }
 
     /// Enable the square-wave output.
+    /// (Does not alter the device register if already enabled).
     pub fn enable_square_wave_output(&mut self) -> Result<(), Error<E>> {
         self.set_register_bit_flag(Register::SQWOUT, BitFlags::SQWE)
     }
 
     /// Disable the square-wave output.
+    /// (Does not alter the device register if already disabled).
     pub fn disable_square_wave_output(&mut self) -> Result<(), Error<E>> {
         self.clear_register_bit_flag(Register::SQWOUT, BitFlags::SQWE)
     }
@@ -527,16 +541,19 @@ where
     }
 
     /// Set square-wave output level high
+    /// (Does not alter the device register if level is already high).
     pub fn set_square_wave_output_level_high(&mut self) -> Result<(), Error<E>> {
         self.set_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
     }
 
     /// Set square-wave output level low
+    /// (Does not alter the device register if level is already low).
     pub fn set_square_wave_output_level_low(&mut self) -> Result<(), Error<E>> {
         self.clear_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
     }
 
     /// Set square-wave output level
+    /// (Does not alter the device register if same level is already configured).
     pub fn set_square_wave_output_level(&mut self, should_level_be_high: bool) -> Result<(), Error<E>> {
         if should_level_be_high {
             self.set_square_wave_output_level_high()
@@ -556,6 +573,7 @@ where
     }
 
     /// Set square-wave output rate control bits
+    /// (Does not alter the device register if the same rate is already configured).
     pub fn set_square_wave_output_rate(&mut self, rate_bits: SQWOUTRateBits) -> Result<(), Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         if rate_bits.rs0 != ((data & BitFlags::OUTRATERS0) != 0)

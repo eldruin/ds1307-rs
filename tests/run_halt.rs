@@ -28,10 +28,24 @@ fn can_set_running() {
 }
 
 #[test]
+fn set_running_when_already_running_does_nothing() {
+    let mut rtc = setup(&[0b1000_0000]);
+    rtc.set_running().unwrap();
+    check_sent_data(rtc, &[ENABLE_REGISTER]);
+}
+
+#[test]
 fn can_halt() {
-    let mut rtc = setup(&[0]);
+    let mut rtc = setup(&[0b1000_0000]);
     rtc.halt().unwrap();
     check_sent_data(rtc, &[ENABLE_REGISTER, 0b0000_0000]);
+}
+
+#[test]
+fn halt_when_already_halted_does_nothing() {
+    let mut rtc = setup(&[0]);
+    rtc.halt().unwrap();
+    check_sent_data(rtc, &[ENABLE_REGISTER]);
 }
 
 #[test]
