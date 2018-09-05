@@ -225,12 +225,12 @@ impl BitFlags {
 const DEVICE_ADDRESS: u8    = 0b110_1000;
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
 
-/// Square-wave output rate bits
+/// Square-wave output rate bits.
 #[derive(Debug, Clone)]
 pub struct SQWOUTRateBits {
-    /// Rate selection control bit 0
+    /// Rate selection control bit 0.
     pub rs0 : bool,
-    /// Rate selection control bit 1
+    /// Rate selection control bit 1.
     pub rs1 : bool,
 }
 
@@ -245,7 +245,7 @@ impl<I2C, E> DS1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
-    /// Create a new instance
+    /// Create a new instance.
     pub fn new(i2c: I2C) -> Self {
         DS1307 {
             i2c,
@@ -257,13 +257,13 @@ where
         self.i2c
     }
 
-    /// Reads if the clock is running
+    /// Read if the clock is running.
     pub fn is_running(&mut self) -> Result<bool, Error<E>> {
         let data = self.read_register(Register::SECONDS)?;
         Ok(data & BitFlags::CH != 0)
     }
 
-    /// Sets the clock to run (default on power-on).
+    /// Set the clock to run (default on power-on).
     /// (Does not alter the device register if already running).
     pub fn set_running(&mut self) -> Result<(), Error<E>> {
         // needs to keep the seconds so we read it first
@@ -276,7 +276,7 @@ where
         }
     }
 
-    /// Halts the clock.
+    /// Halt the clock.
     /// (Does not alter the device register if already halted).
     pub fn halt(&mut self) -> Result<(), Error<E>> {
         // needs to keep the seconds so we read it first
@@ -289,18 +289,18 @@ where
         }
     }
 
-    /// Reads the seconds
+    /// Read the seconds.
     pub fn get_seconds(&mut self) -> Result<u8, Error<E>> {
         let data = self.read_register(Register::SECONDS)?;
         Ok(packed_bcd_to_decimal(remove_ch_bit(data)))
     }
 
-    /// Read the minutes
+    /// Read the minutes.
     pub fn get_minutes(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::MINUTES)
     }
 
-    /// Read the hours
+    /// Read the hours.
     pub fn get_hours(&mut self) -> Result<Hours, Error<E>> {
         let data = self.read_register(Register::HOURS)?;
         self.get_hours_from_register(data)
@@ -318,28 +318,28 @@ where
         }
     }
 
-    /// Read the day of the week (1-7)
+    /// Read the day of the week (1-7).
     pub fn get_weekday(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOW)
     }
 
-    /// Read the day of the month (1-31)
+    /// Read the day of the month (1-31).
     pub fn get_day(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOM)
     }
 
-    /// Read the month (1-12)
+    /// Read the month (1-12).
     pub fn get_month(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::MONTH)
     }
 
-    /// Read the year (2000-2099)
+    /// Read the year (2000-2099).
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let year = self.read_register_decimal(Register::YEAR)?;
         Ok(2000 + (year as u16))
     }
 
-    /// Read the date and time
+    /// Read the date and time.
     pub fn get_datetime(&mut self) -> Result<DateTime, Error<E>> {
         let mut data = [0u8; 7];
         self.i2c
@@ -356,7 +356,8 @@ where
         })
     }
     
-    /// Set the seconds (0-59)
+    /// Set the seconds (0-59).
+    ///
     /// Will thrown an InvalidInputData error if the seconds are out of range.
     pub fn set_seconds(&mut self, seconds: u8) -> Result<(), Error<E>> {
         if seconds > 59 {
@@ -367,7 +368,8 @@ where
         self.write_register(Register::SECONDS, data & BitFlags::CH | decimal_to_packed_bcd(seconds))
     }
 
-    /// Set the minutes (0-59)
+    /// Set the minutes (0-59).
+    ///
     /// Will thrown an InvalidInputData error if the minutes are out of range.
     pub fn set_minutes(&mut self, minutes: u8) -> Result<(), Error<E>> {
         if minutes > 59 {
@@ -376,8 +378,10 @@ where
         self.write_register_decimal(Register::MINUTES, minutes)
     }
 
-    /// Set the hours
-    /// Changes the operating mode to 12h/24h depending on the parameter
+    /// Set the hours.
+    ///
+    /// Changes the operating mode to 12h/24h depending on the parameter.
+    ///
     /// Will thrown an InvalidInputData error if the hours are out of range.
     pub fn set_hours(&mut self, hours: Hours) -> Result<(), Error<E>> {
         let value = self.get_hours_register_value(&hours)?;
@@ -395,7 +399,8 @@ where
         }
     }
 
-    /// Set the day of week (1-7)
+    /// Set the day of week (1-7).
+    ///
     /// Will thrown an InvalidInputData error if the day is out of range.
     pub fn set_weekday(&mut self, weekday: u8) -> Result<(), Error<E>> {
         if weekday < 1 || weekday > 7 {
@@ -404,7 +409,8 @@ where
         self.write_register(Register::DOW, weekday)
     }
 
-    /// Set the day of month (1-31)
+    /// Set the day of month (1-31).
+    ///
     /// Will thrown an InvalidInputData error if the day is out of range.
     pub fn set_day(&mut self, day: u8) -> Result<(), Error<E>> {
         if day < 1 || day > 7 {
@@ -413,7 +419,8 @@ where
         self.write_register(Register::DOM, day)
     }
 
-    /// Set the month (1-12)
+    /// Set the month (1-12).
+    ///
     /// Will thrown an InvalidInputData error if the month is out of range.
     pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
         if month < 1 || month > 12 {
@@ -422,7 +429,8 @@ where
         self.write_register_decimal(Register::MONTH, month)
     }
 
-    /// Set the year (2000-2099)
+    /// Set the year (2000-2099).
+    ///
     /// Will thrown an InvalidInputData error if the year is out of range.
     pub fn set_year(&mut self, year: u16) -> Result<(), Error<E>> {
         if year < 2000 || year > 2099 {
@@ -431,7 +439,8 @@ where
         self.write_register_decimal(Register::YEAR, (year - 2000) as u8)
     }
 
-    /// Set the date and time
+    /// Set the date and time.
+    ///
     /// Will thrown an InvalidInputData error if any of the parameters is out of range.
     pub fn set_datetime(&mut self, datetime: &DateTime) -> Result<(), Error<E>> {
         if datetime.year < 2000 || datetime.year > 2099 ||
@@ -456,8 +465,10 @@ where
     }
 
     /// Read a data array from the user RAM starting at the given offset.
+    ///
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
-    /// the parameters are: address_offset: [0-55] and data length: [0-56].
+    /// the parameters are: address_offset: [0-55] and data array length: [0-56].
+    ///
     /// Will return an InvalidInputData error if attempting to access a position not
     /// available or if attempting to read too much data.
     pub fn read_ram(&mut self, address_offset: u8, data: &mut [u8]) -> Result<(), Error<E>> {
@@ -471,8 +482,10 @@ where
     }
 
     /// Write a data array to the user RAM starting at the given offset.
+    ///
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
-    /// the parameters are: address_offset: [0-55] and data length: [0-56].
+    /// the parameters are: address_offset: [0-55] and data array length: [0-56].
+    ///
     /// Will return an InvalidInputData error if attempting to access a position not
     /// available or if attempting to write too much data.
     pub fn write_ram(&mut self, address_offset: u8, data: &[u8]) -> Result<(), Error<E>> {
@@ -534,25 +547,25 @@ where
         }
     }
 
-    /// Read status of square-wave output level control bit
+    /// Read status of square-wave output level control bit.
     pub fn get_square_wave_output_level(&mut self) -> Result<bool, Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         Ok((data & BitFlags::OUTLEVEL) != 0)
     }
 
-    /// Set square-wave output level high
+    /// Set square-wave output level high.
     /// (Does not alter the device register if level is already high).
     pub fn set_square_wave_output_level_high(&mut self) -> Result<(), Error<E>> {
         self.set_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
     }
 
-    /// Set square-wave output level low
+    /// Set square-wave output level low.
     /// (Does not alter the device register if level is already low).
     pub fn set_square_wave_output_level_low(&mut self) -> Result<(), Error<E>> {
         self.clear_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
     }
 
-    /// Set square-wave output level
+    /// Set square-wave output level.
     /// (Does not alter the device register if same level is already configured).
     pub fn set_square_wave_output_level(&mut self, should_level_be_high: bool) -> Result<(), Error<E>> {
         if should_level_be_high {
@@ -563,7 +576,7 @@ where
         }
     }
 
-    /// Read square-wave output rate control bits
+    /// Read square-wave output rate control bits.
     pub fn get_square_wave_output_rate(&mut self) -> Result<SQWOUTRateBits, Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         Ok(SQWOUTRateBits{
@@ -572,7 +585,7 @@ where
         })
     }
 
-    /// Set square-wave output rate control bits
+    /// Set square-wave output rate control bits.
     /// (Does not alter the device register if the same rate is already configured).
     pub fn set_square_wave_output_rate(&mut self, rate_bits: SQWOUTRateBits) -> Result<(), Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
