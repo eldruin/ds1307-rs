@@ -227,6 +227,11 @@ where
         self.i2c
     }
 
+    fn is_register_bit_flag_high(&mut self, address: u8, bitmask: u8) -> Result<bool, Error<E>> {
+        let data = self.read_register(address)?;
+        Ok((data & bitmask) != 0)
+    }
+
     fn set_register_bit_flag(&mut self, address: u8, bitmask: u8) -> Result<(), Error<E>> {
         let data = self.read_register(address)?;
         if (data & bitmask) == 0 {

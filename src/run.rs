@@ -12,8 +12,7 @@ where
 {
      /// Read if the clock is running.
     pub fn is_running(&mut self) -> Result<bool, Error<E>> {
-        let data = self.read_register(Register::SECONDS)?;
-        Ok(data & BitFlags::CH != 0)
+        self.is_register_bit_flag_high(Register::SECONDS, BitFlags::CH)
     }
 
     /// Set the clock to run (default on power-on).
