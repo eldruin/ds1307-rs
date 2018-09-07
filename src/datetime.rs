@@ -93,7 +93,7 @@ where
 
     /// Read the date and time.
     pub fn get_datetime(&mut self) -> Result<DateTime, Error<E>> {
-        let mut data = [0u8; 7];
+        let mut data = [0; 7];
         self.i2c
             .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
             .map_err(Error::I2C)?;
