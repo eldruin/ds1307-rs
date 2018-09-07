@@ -9,29 +9,29 @@ use super::{DS1307, Error, DEVICE_ADDRESS, Register, BitFlags};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
 pub enum Hours {
-    /// AM (1-12)
+    /// AM [1-12]
     AM(u8),
-    /// PM (1-12)
+    /// PM [1-12]
     PM(u8),
-    /// 24H format (0-23)
+    /// 24H format [0-23]
     H24(u8),
 }
 
 /// Date and time
 pub struct DateTime {
-    /// Year (2000 - 2099)
+    /// Year [2000-2099]
     pub year    : u16,
-    /// Month (1-12)
+    /// Month [1-12]
     pub month   : u8,
-    /// Day (1-31)
+    /// Day [1-31]
     pub day     : u8,
-    /// Weekday (1-7)
+    /// Weekday [1-7]
     pub weekday : u8,
     /// Hour in 24h/12h format
     pub hour    : Hours,
-    /// Minute (0-59)
+    /// Minute [0-59]
     pub minute  : u8,
-    /// Second (0-59)
+    /// Second [0-59]
     pub second  : u8,
 }
 
@@ -68,22 +68,22 @@ where
         }
     }
 
-    /// Read the day of the week (1-7).
+    /// Read the day of the week [1-7].
     pub fn get_weekday(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOW)
     }
 
-    /// Read the day of the month (1-31).
+    /// Read the day of the month [1-31].
     pub fn get_day(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::DOM)
     }
 
-    /// Read the month (1-12).
+    /// Read the month [1-12].
     pub fn get_month(&mut self) -> Result<u8, Error<E>> {
         self.read_register_decimal(Register::MONTH)
     }
 
-    /// Read the year (2000-2099).
+    /// Read the year [2000-2099].
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let year = self.read_register_decimal(Register::YEAR)?;
         Ok(2000 + (year as u16))
@@ -106,9 +106,9 @@ where
         })
     }
     
-    /// Set the seconds (0-59).
+    /// Set the seconds [0-59].
     ///
-    /// Will thrown an InvalidInputData error if the seconds are out of range.
+    /// Will return an `Error::InvalidInputData` if the seconds are out of range.
     pub fn set_seconds(&mut self, seconds: u8) -> Result<(), Error<E>> {
         if seconds > 59 {
             return Err(Error::InvalidInputData);
@@ -118,9 +118,9 @@ where
         self.write_register(Register::SECONDS, data & BitFlags::CH | decimal_to_packed_bcd(seconds))
     }
 
-    /// Set the minutes (0-59).
+    /// Set the minutes [0-59].
     ///
-    /// Will thrown an InvalidInputData error if the minutes are out of range.
+    /// Will return an `Error::InvalidInputData` if the minutes are out of range.
     pub fn set_minutes(&mut self, minutes: u8) -> Result<(), Error<E>> {
         if minutes > 59 {
             return Err(Error::InvalidInputData);
@@ -132,7 +132,7 @@ where
     ///
     /// Changes the operating mode to 12h/24h depending on the parameter.
     ///
-    /// Will thrown an InvalidInputData error if the hours are out of range.
+    /// Will return an `Error::InvalidInputData` if the hours are out of range.
     pub fn set_hours(&mut self, hours: Hours) -> Result<(), Error<E>> {
         let value = self.get_hours_register_value(&hours)?;
         self.write_register(Register::HOURS, value)
@@ -149,9 +149,9 @@ where
         }
     }
 
-    /// Set the day of week (1-7).
+    /// Set the day of week [1-7].
     ///
-    /// Will thrown an InvalidInputData error if the day is out of range.
+    /// Will return an `Error::InvalidInputData` if the day is out of range.
     pub fn set_weekday(&mut self, weekday: u8) -> Result<(), Error<E>> {
         if weekday < 1 || weekday > 7 {
             return Err(Error::InvalidInputData);
@@ -159,9 +159,9 @@ where
         self.write_register(Register::DOW, weekday)
     }
 
-    /// Set the day of month (1-31).
+    /// Set the day of month [1-31].
     ///
-    /// Will thrown an InvalidInputData error if the day is out of range.
+    /// Will return an `Error::InvalidInputData` if the day is out of range.
     pub fn set_day(&mut self, day: u8) -> Result<(), Error<E>> {
         if day < 1 || day > 7 {
             return Err(Error::InvalidInputData);
@@ -169,9 +169,9 @@ where
         self.write_register(Register::DOM, day)
     }
 
-    /// Set the month (1-12).
+    /// Set the month [1-12].
     ///
-    /// Will thrown an InvalidInputData error if the month is out of range.
+    /// Will return an `Error::InvalidInputData` if the month is out of range.
     pub fn set_month(&mut self, month: u8) -> Result<(), Error<E>> {
         if month < 1 || month > 12 {
             return Err(Error::InvalidInputData);
@@ -179,9 +179,9 @@ where
         self.write_register_decimal(Register::MONTH, month)
     }
 
-    /// Set the year (2000-2099).
+    /// Set the year [2000-2099].
     ///
-    /// Will thrown an InvalidInputData error if the year is out of range.
+    /// Will return an `Error::InvalidInputData` if the year is out of range.
     pub fn set_year(&mut self, year: u16) -> Result<(), Error<E>> {
         if year < 2000 || year > 2099 {
             return Err(Error::InvalidInputData);
@@ -191,7 +191,7 @@ where
 
     /// Set the date and time.
     ///
-    /// Will thrown an InvalidInputData error if any of the parameters is out of range.
+    /// Will return an `Error::InvalidInputData` if any of the parameters is out of range.
     pub fn set_datetime(&mut self, datetime: &DateTime) -> Result<(), Error<E>> {
         if datetime.year < 2000 || datetime.year > 2099 ||
            datetime.month < 1   || datetime.month > 12  ||

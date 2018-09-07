@@ -16,9 +16,9 @@ where
     /// Read a data array from the user RAM starting at the given offset.
     ///
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
-    /// the parameters are: address_offset: [0-55] and data array length: [0-56].
+    /// the parameters are: `address_offset`: [0-55] and `data` array length: [0-56].
     ///
-    /// Will return an InvalidInputData error if attempting to access a position not
+    /// Will return an `Error::InvalidInputData` if attempting to access a position not
     /// available or if attempting to read too much data.
     pub fn read_ram(&mut self, address_offset: u8, data: &mut [u8]) -> Result<(), Error<E>> {
         if data.is_empty() {
@@ -33,9 +33,9 @@ where
     /// Write a data array to the user RAM starting at the given offset.
     ///
     /// There is a total of 56 bytes of user RAM available so the valid ranges for
-    /// the parameters are: address_offset: [0-55] and data array length: [0-56].
+    /// the parameters are: `address_offset`: [0-55] and `data` array length: [0-56].
     ///
-    /// Will return an InvalidInputData error if attempting to access a position not
+    /// Will return an `Error::InvalidInputData` if attempting to access a position not
     /// available or if attempting to write too much data.
     pub fn write_ram(&mut self, address_offset: u8, data: &[u8]) -> Result<(), Error<E>> {
         if data.is_empty() {
