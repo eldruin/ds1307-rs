@@ -8,6 +8,7 @@ use hal::blocking::i2c::{Write, WriteRead};
 use super::{DS1307, Error, DEVICE_ADDRESS, Register, BitFlags};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
+#[derive(Debug, Clone)]
 pub enum Hours {
     /// AM [1-12]
     AM(u8),
@@ -18,6 +19,7 @@ pub enum Hours {
 }
 
 /// Date and time
+#[derive(Debug, Clone)]
 pub struct DateTime {
     /// Year [2000-2099]
     pub year    : u16,
