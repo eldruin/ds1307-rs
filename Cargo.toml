@@ -20,6 +20,10 @@ include = [
     "LICENSE-APACHE",
 ]
 
+[badges.travis-ci]
+branch = "master"
+repository = "eldruin/ds1307-rs"
+
 [features]
 default = []
 
