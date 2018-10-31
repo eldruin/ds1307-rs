@@ -8,7 +8,7 @@ use hal::blocking::i2c::{Write, WriteRead};
 use super::{DS1307, Error, Register, BitFlags};
 
 /// Square-wave output rate bits.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SQWOUTRateBits {
     /// Rate selection control bit 0.
     pub rs0 : bool,

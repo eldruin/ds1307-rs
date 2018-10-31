@@ -8,7 +8,7 @@ use hal::blocking::i2c::{Write, WriteRead};
 use super::{DS1307, Error, DEVICE_ADDRESS, Register, BitFlags};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Hours {
     /// AM [1-12]
     AM(u8),
@@ -19,7 +19,7 @@ pub enum Hours {
 }
 
 /// Date and time
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DateTime {
     /// Year [2000-2099]
     pub year    : u16,
@@ -59,7 +59,7 @@ where
     }
 
     fn get_hours_from_register(&self, data: u8) -> Result<Hours, Error<E>> {
-        if is_24h_format(data) {        
+        if is_24h_format(data) {
             Ok(Hours::H24(packed_bcd_to_decimal(data & !BitFlags::H24_H12)))
         }
         else if is_am(data) {
@@ -107,7 +107,7 @@ where
             second:  packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]))
         })
     }
-    
+
     /// Set the seconds [0-59].
     ///
     /// Will return an `Error::InvalidInputData` if the seconds are out of range.
@@ -267,7 +267,7 @@ mod tests {
         assert_eq!(21, packed_bcd_to_decimal(0b0010_0001));
         assert_eq!(59, packed_bcd_to_decimal(0b0101_1001));
     }
-    
+
     #[test]
     fn can_convert_decimal_to_packed_bcd() {
         assert_eq!(0b0000_0000, decimal_to_packed_bcd( 0));
