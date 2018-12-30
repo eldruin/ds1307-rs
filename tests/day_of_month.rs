@@ -21,7 +21,7 @@ fn too_small_day_of_month_returns_error() {
 #[test]
 fn too_big_day_of_month_returns_error() {
     let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_day(8));
+    assert_invalid_input_data_error(rtc.set_day(32));
 }
 
 #[test]

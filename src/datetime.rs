@@ -165,7 +165,7 @@ where
     ///
     /// Will return an `Error::InvalidInputData` if the day is out of range.
     pub fn set_day(&mut self, day: u8) -> Result<(), Error<E>> {
-        if day < 1 || day > 7 {
+        if day < 1 || day > 31 {
             return Err(Error::InvalidInputData);
         }
         self.write_register(Register::DOM, day)
