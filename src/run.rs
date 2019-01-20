@@ -3,14 +3,14 @@
 #![deny(warnings)]
 
 extern crate embedded_hal as hal;
+use super::{BitFlags, Error, Register, DS1307};
 use hal::blocking::i2c::{Write, WriteRead};
-use super::{DS1307, Error, Register, BitFlags};
 
 impl<I2C, E> DS1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
-     /// Read if the clock is running.
+    /// Read if the clock is running.
     pub fn is_running(&mut self) -> Result<bool, Error<E>> {
         self.is_register_bit_flag_high(Register::SECONDS, BitFlags::CH)
     }

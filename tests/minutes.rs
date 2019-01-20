@@ -1,9 +1,9 @@
 extern crate ds1307;
 
 mod common;
-use common::{setup, check_sent_data, assert_invalid_input_data_error};
+use common::{assert_invalid_input_data_error, check_sent_data, setup};
 
-const MINUTES_REGISTER : u8 = 0x01;
+const MINUTES_REGISTER: u8 = 0x01;
 
 #[test]
 fn can_read_minutes() {

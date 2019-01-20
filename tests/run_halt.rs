@@ -2,9 +2,9 @@ extern crate ds1307;
 
 #[allow(dead_code)]
 mod common;
-use common::{setup, check_sent_data};
+use common::{check_sent_data, setup};
 
-const ENABLE_REGISTER : u8 = 0x00;
+const ENABLE_REGISTER: u8 = 0x00;
 
 #[test]
 fn can_read_is_running_running() {
@@ -61,5 +61,3 @@ fn halt_keeps_seconds() {
     rtc.halt().unwrap();
     check_sent_data(rtc, &[ENABLE_REGISTER, 0b0101_0101]);
 }
-
-

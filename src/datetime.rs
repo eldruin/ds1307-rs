@@ -1,11 +1,10 @@
-
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
 extern crate embedded_hal as hal;
+use super::{BitFlags, Error, Register, DEVICE_ADDRESS, DS1307};
 use hal::blocking::i2c::{Write, WriteRead};
-use super::{DS1307, Error, DEVICE_ADDRESS, Register, BitFlags};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
 #[derive(Debug, Clone, PartialEq)]
@@ -22,19 +21,19 @@ pub enum Hours {
 #[derive(Debug, Clone, PartialEq)]
 pub struct DateTime {
     /// Year [2000-2099]
-    pub year    : u16,
+    pub year: u16,
     /// Month [1-12]
-    pub month   : u8,
+    pub month: u8,
     /// Day [1-31]
-    pub day     : u8,
+    pub day: u8,
     /// Weekday [1-7]
-    pub weekday : u8,
+    pub weekday: u8,
     /// Hour in 24h/12h format
-    pub hour    : Hours,
+    pub hour: Hours,
     /// Minute [0-59]
-    pub minute  : u8,
+    pub minute: u8,
     /// Second [0-59]
-    pub second  : u8,
+    pub second: u8,
 }
 
 impl<I2C, E> DS1307<I2C>
@@ -61,12 +60,14 @@ where
     fn get_hours_from_register(&self, data: u8) -> Result<Hours, Error<E>> {
         if is_24h_format(data) {
             Ok(Hours::H24(packed_bcd_to_decimal(data & !BitFlags::H24_H12)))
-        }
-        else if is_am(data) {
-            Ok(Hours::AM(packed_bcd_to_decimal(data & !(BitFlags::H24_H12 | BitFlags::AM_PM))))
-        }
-        else {
-            Ok(Hours::PM(packed_bcd_to_decimal(data & !(BitFlags::H24_H12 | BitFlags::AM_PM))))
+        } else if is_am(data) {
+            Ok(Hours::AM(packed_bcd_to_decimal(
+                data & !(BitFlags::H24_H12 | BitFlags::AM_PM),
+            )))
+        } else {
+            Ok(Hours::PM(packed_bcd_to_decimal(
+                data & !(BitFlags::H24_H12 | BitFlags::AM_PM),
+            )))
         }
     }
 
@@ -98,13 +99,13 @@ where
             .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
             .map_err(Error::I2C)?;
         Ok(DateTime {
-            year:    2000 + (packed_bcd_to_decimal(data[Register::YEAR as usize]) as u16),
-            month:   packed_bcd_to_decimal(data[Register::MONTH as usize]),
-            day:     packed_bcd_to_decimal(data[Register::DOM as usize]),
-            weekday:  packed_bcd_to_decimal(data[Register::DOW as usize]),
-            hour:    self.get_hours_from_register(data[Register::HOURS as usize])?,
-            minute:  packed_bcd_to_decimal(data[Register::MINUTES as usize]),
-            second:  packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]))
+            year: 2000 + (packed_bcd_to_decimal(data[Register::YEAR as usize]) as u16),
+            month: packed_bcd_to_decimal(data[Register::MONTH as usize]),
+            day: packed_bcd_to_decimal(data[Register::DOM as usize]),
+            weekday: packed_bcd_to_decimal(data[Register::DOW as usize]),
+            hour: self.get_hours_from_register(data[Register::HOURS as usize])?,
+            minute: packed_bcd_to_decimal(data[Register::MINUTES as usize]),
+            second: packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize])),
         })
     }
 
@@ -117,7 +118,10 @@ where
         }
         // needs to keep the CH bit status so we read it first
         let data = self.read_register(Register::SECONDS)?;
-        self.write_register(Register::SECONDS, data & BitFlags::CH | decimal_to_packed_bcd(seconds))
+        self.write_register(
+            Register::SECONDS,
+            data & BitFlags::CH | decimal_to_packed_bcd(seconds),
+        )
     }
 
     /// Set the minutes [0-59].
@@ -145,9 +149,9 @@ where
             Hours::H24(h) if h > 23 => Err(Error::InvalidInputData),
             Hours::H24(h) => Ok(decimal_to_packed_bcd(h)),
             Hours::AM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::AM(h) =>  Ok(BitFlags::H24_H12 | decimal_to_packed_bcd(h)),
+            Hours::AM(h) => Ok(BitFlags::H24_H12 | decimal_to_packed_bcd(h)),
             Hours::PM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
-            Hours::PM(h) =>  Ok(BitFlags::H24_H12 | BitFlags::AM_PM | decimal_to_packed_bcd(h)),
+            Hours::PM(h) => Ok(BitFlags::H24_H12 | BitFlags::AM_PM | decimal_to_packed_bcd(h)),
         }
     }
 
@@ -204,16 +208,16 @@ where
             return Err(Error::InvalidInputData);
         }
         let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
-        let payload = [decimal_to_packed_bcd(datetime.second) | ch_flag,
-                       decimal_to_packed_bcd(datetime.minute),
-                       self.get_hours_register_value(&datetime.hour)?,
-                       decimal_to_packed_bcd(datetime.weekday),
-                       decimal_to_packed_bcd(datetime.day),
-                       decimal_to_packed_bcd(datetime.month),
-                       decimal_to_packed_bcd((datetime.year - 2000) as u8)];
-        self.i2c
-            .write(DEVICE_ADDRESS, &payload)
-            .map_err(Error::I2C)
+        let payload = [
+            decimal_to_packed_bcd(datetime.second) | ch_flag,
+            decimal_to_packed_bcd(datetime.minute),
+            self.get_hours_register_value(&datetime.hour)?,
+            decimal_to_packed_bcd(datetime.weekday),
+            decimal_to_packed_bcd(datetime.day),
+            decimal_to_packed_bcd(datetime.month),
+            decimal_to_packed_bcd((datetime.year - 2000) as u8),
+        ];
+        self.i2c.write(DEVICE_ADDRESS, &payload).map_err(Error::I2C)
     }
 
     fn read_register_decimal(&mut self, register: u8) -> Result<u8, Error<E>> {
@@ -247,7 +251,6 @@ fn packed_bcd_to_decimal(bcd: u8) -> u8 {
 fn decimal_to_packed_bcd(dec: u8) -> u8 {
     ((dec / 10) << 4) | (dec % 10)
 }
-
 
 #[cfg(test)]
 mod tests {

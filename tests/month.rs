@@ -1,9 +1,9 @@
 extern crate ds1307;
 
 mod common;
-use common::{setup, check_sent_data, assert_invalid_input_data_error};
+use common::{assert_invalid_input_data_error, check_sent_data, setup};
 
-const MONTH_REGISTER : u8 = 0x05;
+const MONTH_REGISTER: u8 = 0x05;
 
 #[test]
 fn can_read_month() {

@@ -200,7 +200,7 @@ impl BitFlags {
     const OUTRATERS1 : u8 = 0b0000_0010;
 }
 
-const DEVICE_ADDRESS: u8    = 0b110_1000;
+const DEVICE_ADDRESS: u8 = 0b110_1000;
 
 /// DS1307 driver
 #[derive(Debug, Default)]
@@ -222,9 +222,7 @@ where
 {
     /// Create a new instance.
     pub fn new(i2c: I2C) -> Self {
-        DS1307 {
-            i2c,
-        }
+        DS1307 { i2c }
     }
 
     /// Destroy driver instance, return I²C bus instance.
@@ -241,8 +239,7 @@ where
         let data = self.read_register(address)?;
         if (data & bitmask) == 0 {
             self.write_register(address, data | bitmask)
-        }
-        else {
+        } else {
             Ok(())
         }
     }
@@ -251,17 +248,14 @@ where
         let data = self.read_register(address)?;
         if (data & bitmask) != 0 {
             self.write_register(address, data & !bitmask)
-        }
-        else {
+        } else {
             Ok(())
         }
     }
 
     fn write_register(&mut self, register: u8, data: u8) -> Result<(), Error<E>> {
         let payload: [u8; 2] = [register, data];
-        self.i2c
-            .write(DEVICE_ADDRESS, &payload)
-            .map_err(Error::I2C)
+        self.i2c.write(DEVICE_ADDRESS, &payload).map_err(Error::I2C)
     }
 
     fn read_register(&mut self, register: u8) -> Result<u8, Error<E>> {

@@ -1,9 +1,9 @@
 extern crate ds1307;
 
 mod common;
-use common::{setup, check_sent_data, assert_invalid_input_data_error};
+use common::{assert_invalid_input_data_error, check_sent_data, setup};
 
-const DOW_REGISTER : u8 = 0x03;
+const DOW_REGISTER: u8 = 0x03;
 
 #[test]
 fn can_read_weekday() {
@@ -30,4 +30,3 @@ fn can_write_weekday() {
     rtc.set_weekday(7).unwrap();
     check_sent_data(rtc, &[DOW_REGISTER, 0b0000_0111]);
 }
-

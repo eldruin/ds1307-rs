@@ -2,9 +2,9 @@ extern crate ds1307;
 
 #[allow(dead_code)]
 mod common;
-use common::{setup, check_sent_data};
+use common::{check_sent_data, setup};
 
-const SQWOUT_REGISTER : u8 = 0x07;
+const SQWOUT_REGISTER: u8 = 0x07;
 
 #[test]
 fn can_read_output_level_low() {

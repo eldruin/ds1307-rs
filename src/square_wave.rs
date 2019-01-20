@@ -1,19 +1,18 @@
-
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
 extern crate embedded_hal as hal;
+use super::{BitFlags, Error, Register, DS1307};
 use hal::blocking::i2c::{Write, WriteRead};
-use super::{DS1307, Error, Register, BitFlags};
 
 /// Square-wave output rate bits.
 #[derive(Debug, Clone, PartialEq)]
 pub struct SQWOUTRateBits {
     /// Rate selection control bit 0.
-    pub rs0 : bool,
+    pub rs0: bool,
     /// Rate selection control bit 1.
-    pub rs1 : bool,
+    pub rs1: bool,
 }
 
 impl<I2C, E> DS1307<I2C>
@@ -56,11 +55,13 @@ where
 
     /// Set square-wave output level.
     /// (Does not alter the device register if same level is already configured).
-    pub fn set_square_wave_output_level(&mut self, should_level_be_high: bool) -> Result<(), Error<E>> {
+    pub fn set_square_wave_output_level(
+        &mut self,
+        should_level_be_high: bool,
+    ) -> Result<(), Error<E>> {
         if should_level_be_high {
             self.set_square_wave_output_level_high()
-        }
-        else {
+        } else {
             self.set_square_wave_output_level_low()
         }
     }
@@ -68,18 +69,22 @@ where
     /// Read square-wave output rate control bits.
     pub fn get_square_wave_output_rate(&mut self) -> Result<SQWOUTRateBits, Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
-        Ok(SQWOUTRateBits{
-            rs0 : (data & BitFlags::OUTRATERS0) != 0,
-            rs1 : (data & BitFlags::OUTRATERS1) != 0,
+        Ok(SQWOUTRateBits {
+            rs0: (data & BitFlags::OUTRATERS0) != 0,
+            rs1: (data & BitFlags::OUTRATERS1) != 0,
         })
     }
 
     /// Set square-wave output rate control bits.
     /// (Does not alter the device register if the same rate is already configured).
-    pub fn set_square_wave_output_rate(&mut self, rate_bits: SQWOUTRateBits) -> Result<(), Error<E>> {
+    pub fn set_square_wave_output_rate(
+        &mut self,
+        rate_bits: SQWOUTRateBits,
+    ) -> Result<(), Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         if rate_bits.rs0 != ((data & BitFlags::OUTRATERS0) != 0)
-            || rate_bits.rs1 != ((data & BitFlags::OUTRATERS1) != 0) {
+            || rate_bits.rs1 != ((data & BitFlags::OUTRATERS1) != 0)
+        {
             let mut data = data & !(BitFlags::OUTRATERS0 | BitFlags::OUTRATERS1);
             if rate_bits.rs0 {
                 data = data | BitFlags::OUTRATERS0;
@@ -88,8 +93,7 @@ where
                 data = data | BitFlags::OUTRATERS1;
             }
             self.write_register(Register::SQWOUT, data)
-        }
-        else {
+        } else {
             Ok(())
         }
     }

@@ -2,9 +2,9 @@ extern crate ds1307;
 use ds1307::Hours;
 
 mod common;
-use common::{setup, check_sent_data, assert_invalid_input_data_error};
+use common::{assert_invalid_input_data_error, check_sent_data, setup};
 
-const HOURS_REGISTER : u8 = 0x02;
+const HOURS_REGISTER: u8 = 0x02;
 
 #[test]
 fn can_read_24h_hours() {

@@ -1,11 +1,10 @@
-
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
 extern crate embedded_hal as hal;
+use super::{Error, Register, DEVICE_ADDRESS, DS1307};
 use hal::blocking::i2c::{Write, WriteRead};
-use super::{DS1307, Error, DEVICE_ADDRESS, Register};
 
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
 
@@ -26,7 +25,11 @@ where
         }
         self.check_ram_parameters(address_offset, &data)?;
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[Register::RAM_BEGIN+address_offset], &mut data[..])
+            .write_read(
+                DEVICE_ADDRESS,
+                &[Register::RAM_BEGIN + address_offset],
+                &mut data[..],
+            )
             .map_err(Error::I2C)
     }
 
@@ -52,7 +55,8 @@ where
 
     fn check_ram_parameters(&self, address_offset: u8, data: &[u8]) -> Result<(), Error<E>> {
         if address_offset >= RAM_BYTE_COUNT as u8
-            || (address_offset as usize + data.len()) > RAM_BYTE_COUNT {
+            || (address_offset as usize + data.len()) > RAM_BYTE_COUNT
+        {
             return Err(Error::InvalidInputData);
         }
         Ok(())

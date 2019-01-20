@@ -1,7 +1,7 @@
 extern crate ds1307;
 extern crate embedded_hal_mock as hal;
 
-use self::ds1307::{DS1307, Error};
+use self::ds1307::{Error, DS1307};
 
 const DEVICE_ADDRESS: u8 = 0b110_1000;
 

@@ -1,10 +1,10 @@
 extern crate ds1307;
 
 mod common;
-use common::{setup, check_sent_data, assert_invalid_input_data_error};
+use common::{assert_invalid_input_data_error, check_sent_data, setup};
 
-const RAM_REGISTER_BEGIN : u8    = 0x08;
-const RAM_BYTE_COUNT     : usize = 56;
+const RAM_REGISTER_BEGIN: u8 = 0x08;
+const RAM_BYTE_COUNT: usize = 56;
 
 #[test]
 fn too_long_array_read_returns_error() {
