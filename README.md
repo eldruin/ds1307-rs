@@ -17,6 +17,8 @@ This driver allows you to:
 - Read and write user RAM. See: `read_ram`
 - Control square-wave output. See: `enable_square_wave_output`
 
+[Introductory blog post](https://blog.eldruin.com/ds1307-real-time-clock-rtc-driver-in-rust/)
+
 ## The device
 
 The DS1307 serial real-time clock (RTC) is a low-power, full binary-coded
