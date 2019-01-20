@@ -2,10 +2,15 @@
 //! based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
 //!
 //! This driver allows you to:
-//! - Read and set date and time in 12-hour and 24-hour format. See: `get_datetime`
-//! - Enable and disable the real-time clock. See: `set_running`
-//! - Read and write user RAM. See: `read_ram`
-//! - Control square-wave output. See: `enable_square_wave_output`
+//! - Read and set date and time in 12-hour and 24-hour format. See: [`get_datetime()`].
+//! - Enable and disable the real-time clock. See: [`set_running()`].
+//! - Read and write user RAM. See: [`read_ram()`].
+//! - Control square-wave output. See: [`enable_square_wave_output()`].
+//!
+//! [`get_datetime()`]: struct.DS1307.html#method.get_datetime
+//! [`set_running()`]: struct.DS1307.html#method.set_running
+//! [`read_ram()`]: struct.DS1307.html#method.read_ram
+//! [`enable_square_wave_output()`]: struct.DS1307.html#method.enable_square_wave_output
 //!
 //! ## The device
 //!
@@ -118,13 +123,13 @@
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = DS1307::new(dev);
-//! 
+//!
 //! let data = [171; 3];
 //! rtc.write_ram(2, &data).unwrap();
-//! 
+//!
 //! let mut data = [0; 3];
 //! rtc.read_ram(2, &mut data).unwrap();
-//! 
+//!
 //! println!("{}, {}, {}", data[0], data[1], data[2]);
 //! // This will print: 171, 171, 171
 //! # }
