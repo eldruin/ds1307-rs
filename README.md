@@ -1,7 +1,15 @@
-# Rust DS1307 Real-Time Clock Driver [![Docs](https://img.shields.io/crates/v/ds1307.svg)](https://crates.io/crates/ds1307) [![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307) [![Build Status](https://travis-ci.org/eldruin/ds1307-rs.svg?branch=master)](https://travis-ci.org/eldruin/ds1307-rs)
+# Rust DS1307 Real-Time Clock Driver
+
+[![crates.io](https://img.shields.io/crates/v/ds1307.svg)](https://crates.io/crates/ds1307)
+[![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307)
+[![Build Status](https://travis-ci.org/eldruin/ds1307-rs.svg?branch=master)](https://travis-ci.org/eldruin/ds1307-rs)
+[![Coverage Status](https://coveralls.io/repos/eldruin/ds1307-rs/badge.svg?branch=master)](https://coveralls.io/r/eldruin/ds1307-rs?branch=master)
+![Maintenance Intention](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 
 This is a platform agnostic Rust driver for the DS1307 real-time clock,
-based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
+based on the [`embedded-hal`] traits.
+
+[`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 
 This driver allows you to:
 - Read and set date and time in 12-hour and 24-hour format. See: `get_datetime`

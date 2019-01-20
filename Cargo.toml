@@ -10,22 +10,19 @@ keywords = ["ds1307", "rtc", "clock", "driver", "embedded-hal-driver"]
 categories = ["embedded", "hardware-support", "no-std"]
 homepage = "https://github.com/eldruin/ds1307-rs"
 documentation = "https://docs.rs/ds1307"
-
 include = [
     "**/*.rs",
-    "Cargo.toml",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE-MIT",
-    "LICENSE-APACHE",
+    "/Cargo.toml",
+    "/CHANGELOG.md",
+    "/README.md",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
 ]
 
-[badges.travis-ci]
-branch = "master"
-repository = "eldruin/ds1307-rs"
-
-[features]
-default = []
+[badges]
+travis-ci = { repository = "eldruin/ds1307-rs", branch = "master" }
+coveralls = { repository = "eldruin/ds1307-rs", branch = "master", service = "github" }
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 embedded-hal = "0.2"
