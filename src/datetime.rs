@@ -140,12 +140,12 @@ where
     ///
     /// Will return an `Error::InvalidInputData` if the hours are out of range.
     pub fn set_hours(&mut self, hours: Hours) -> Result<(), Error<E>> {
-        let value = self.get_hours_register_value(&hours)?;
+        let value = self.get_hours_register_value(hours)?;
         self.write_register(Register::HOURS, value)
     }
 
-    fn get_hours_register_value(&mut self, hours: &Hours) -> Result<u8, Error<E>> {
-        match *hours {
+    fn get_hours_register_value(&mut self, hours: Hours) -> Result<u8, Error<E>> {
+        match hours {
             Hours::H24(h) if h > 23 => Err(Error::InvalidInputData),
             Hours::H24(h) => Ok(decimal_to_packed_bcd(h)),
             Hours::AM(h) if h < 1 || h > 12 => Err(Error::InvalidInputData),
@@ -211,7 +211,7 @@ where
         let payload = [
             decimal_to_packed_bcd(datetime.second) | ch_flag,
             decimal_to_packed_bcd(datetime.minute),
-            self.get_hours_register_value(&datetime.hour)?,
+            self.get_hours_register_value(datetime.hour)?,
             decimal_to_packed_bcd(datetime.weekday),
             decimal_to_packed_bcd(datetime.day),
             decimal_to_packed_bcd(datetime.month),
