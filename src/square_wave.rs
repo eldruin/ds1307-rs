@@ -87,10 +87,10 @@ where
         {
             let mut data = data & !(BitFlags::OUTRATERS0 | BitFlags::OUTRATERS1);
             if rate_bits.rs0 {
-                data = data | BitFlags::OUTRATERS0;
+                data |= BitFlags::OUTRATERS0;
             }
             if rate_bits.rs1 {
-                data = data | BitFlags::OUTRATERS1;
+                data |= BitFlags::OUTRATERS1;
             }
             self.write_register(Register::SQWOUT, data)
         } else {
