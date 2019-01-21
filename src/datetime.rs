@@ -89,7 +89,7 @@ where
     /// Read the year [2000-2099].
     pub fn get_year(&mut self) -> Result<u16, Error<E>> {
         let year = self.read_register_decimal(Register::YEAR)?;
-        Ok(2000 + (year as u16))
+        Ok(2000 + u16::from(year))
     }
 
     /// Read the date and time.
@@ -99,7 +99,7 @@ where
             .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
             .map_err(Error::I2C)?;
         Ok(DateTime {
-            year: 2000 + (packed_bcd_to_decimal(data[Register::YEAR as usize]) as u16),
+            year: 2000 + u16::from(packed_bcd_to_decimal(data[Register::YEAR as usize])),
             month: packed_bcd_to_decimal(data[Register::MONTH as usize]),
             day: packed_bcd_to_decimal(data[Register::DOM as usize]),
             weekday: packed_bcd_to_decimal(data[Register::DOW as usize]),
