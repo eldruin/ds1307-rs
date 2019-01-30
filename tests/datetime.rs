@@ -20,11 +20,7 @@ fn can_read_datetime() {
     assert_eq!(08, datetime.month);
     assert_eq!(13, datetime.day);
     assert_eq!(2, datetime.weekday);
-    if let Hours::H24(h) = datetime.hour {
-        assert_eq!(23, h);
-    } else {
-        panic!();
-    }
+    check_hours!(datetime.hour, H24, 23);
     assert_eq!(59, datetime.minute);
     assert_eq!(58, datetime.second);
     check_sent_data(rtc, &[0x00]);

@@ -9,10 +9,7 @@ const HOURS_REGISTER: u8 = 0x02;
 #[test]
 fn can_read_24h_hours() {
     let mut rtc = setup(&[0b0010_0011]);
-    match rtc.get_hours().unwrap() {
-        Hours::H24(h) => assert_eq!(23, h),
-        _ => panic!(),
-    }
+    check_hours!(rtc.get_hours().unwrap(), H24, 23);
     check_sent_data(rtc, &[HOURS_REGISTER]);
 }
 
@@ -32,10 +29,7 @@ fn can_write_24h_hours() {
 #[test]
 fn can_read_12h_am_hours() {
     let mut rtc = setup(&[0b0101_0010]);
-    match rtc.get_hours().unwrap() {
-        Hours::AM(h) => assert_eq!(12, h),
-        _ => panic!(),
-    }
+    check_hours!(rtc.get_hours().unwrap(), AM, 12);
     check_sent_data(rtc, &[HOURS_REGISTER]);
 }
 
@@ -61,10 +55,7 @@ fn can_write_12h_am_hours() {
 #[test]
 fn can_read_12h_pm_hours() {
     let mut rtc = setup(&[0b0111_0010]);
-    match rtc.get_hours().unwrap() {
-        Hours::PM(h) => assert_eq!(12, h),
-        _ => panic!(),
-    }
+    check_hours!(rtc.get_hours().unwrap(), PM, 12);
     check_sent_data(rtc, &[HOURS_REGISTER]);
 }
 

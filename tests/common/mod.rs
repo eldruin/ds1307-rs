@@ -23,3 +23,13 @@ pub fn assert_invalid_input_data_error<T, E>(result: Result<T, Error<E>>) {
         _ => panic!("Did not return Error::InvalidInputData."),
     }
 }
+
+#[macro_export]
+macro_rules! check_hours {
+    ($result:expr, $variant:ident, $expected:expr) => {
+        match $result {
+            Hours::$variant(h) => assert_eq!($expected, h),
+            _ => panic!(),
+        }
+    };
+}
