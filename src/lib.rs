@@ -30,6 +30,11 @@
 //! Datasheet: [DS1307](https://datasheets.maximintegrated.com/en/ds/DS1307.pdf)
 //!
 //! ## Usage examples (see also examples folder)
+//!
+//! Please find additional examples using hardware in this repository: [driver-examples]
+//!
+//! [driver-examples]: https://github.com/eldruin/driver-examples
+//!
 //! ### Get the year
 //!
 //! ```no_run
