@@ -1,8 +1,3 @@
-#![deny(unsafe_code)]
-#![deny(missing_docs)]
-#![deny(warnings)]
-
-extern crate embedded_hal as hal;
 use super::{BitFlags, Error, Register, DEVICE_ADDRESS, DS1307};
 use hal::blocking::i2c::{Write, WriteRead};
 
