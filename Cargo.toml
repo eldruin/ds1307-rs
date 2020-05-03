@@ -11,7 +11,7 @@ categories = ["embedded", "hardware-support", "no-std"]
 homepage = "https://github.com/eldruin/ds1307-rs"
 documentation = "https://docs.rs/ds1307"
 include = [
-    "**/*.rs",
+    "/**/*.rs",
     "/Cargo.toml",
     "/CHANGELOG.md",
     "/README.md",
