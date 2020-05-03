@@ -4,7 +4,6 @@
 [![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307)
 [![Build Status](https://travis-ci.org/eldruin/ds1307-rs.svg?branch=master)](https://travis-ci.org/eldruin/ds1307-rs)
 [![Coverage Status](https://coveralls.io/repos/eldruin/ds1307-rs/badge.svg?branch=master)](https://coveralls.io/r/eldruin/ds1307-rs?branch=master)
-![Maintenance Intention](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
 
 This is a platform agnostic Rust driver for the DS1307 real-time clock,
 based on the [`embedded-hal`] traits.
