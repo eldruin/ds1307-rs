@@ -1,5 +1,5 @@
-use super::{BitFlags, Error, Register, DEVICE_ADDRESS, DS1307};
-use hal::blocking::i2c::{Write, WriteRead};
+use crate::{BitFlags, Error, Register, DEVICE_ADDRESS, DS1307};
+use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
 #[derive(Debug, Clone, Copy, PartialEq)]

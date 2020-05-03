@@ -38,8 +38,7 @@
 //! ### Get the year
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::DS1307;
 //!
 //! # fn main() {
@@ -54,8 +53,7 @@
 //! ### Set the year
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::DS1307;
 //!
 //! # fn main() {
@@ -69,8 +67,7 @@
 //! ### Set the current date and time at once
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::{DS1307, DateTime, Hours};
 //!
 //! # fn main() {
@@ -92,8 +89,7 @@
 //! ### Get the current date and time at once
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::{DS1307, Hours};
 //!
 //! # fn main() {
@@ -121,8 +117,7 @@
 //! ### Read and write user RAM
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::DS1307;
 //!
 //! # fn main() {
@@ -143,8 +138,7 @@
 //! ### Enable square-wave output and select rate
 //!
 //! ```no_run
-//! extern crate linux_embedded_hal as hal;
-//! extern crate ds1307;
+//! use linux_embedded_hal as hal;
 //! use ds1307::{DS1307, SQWOUTRateBits};
 //!
 //! # fn main() {
@@ -164,9 +158,7 @@
 #![deny(missing_docs)]
 #![no_std]
 
-extern crate embedded_hal as hal;
-
-use hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// All possible errors in this crate
 #[derive(Debug)]
@@ -214,11 +206,11 @@ pub struct DS1307<I2C> {
 }
 
 mod datetime;
-pub use datetime::{DateTime, Hours};
+pub use crate::datetime::{DateTime, Hours};
 mod ram;
 mod run;
 mod square_wave;
-pub use square_wave::SQWOUTRateBits;
+pub use crate::square_wave::SQWOUTRateBits;
 
 impl<I2C, E> DS1307<I2C>
 where

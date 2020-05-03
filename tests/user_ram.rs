@@ -1,9 +1,7 @@
-extern crate ds1307;
-extern crate embedded_hal_mock as hal;
-use self::ds1307::Error;
-use self::hal::i2c::Transaction as I2cTrans;
+use ds1307::Error;
+use embedded_hal_mock::i2c::Transaction as I2cTrans;
 mod common;
-use common::{destroy, new, ADDR};
+use crate::common::{destroy, new, ADDR};
 
 const RAM_BEGIN: u8 = 0x08;
 const RAM_BYTE_COUNT: usize = 56;

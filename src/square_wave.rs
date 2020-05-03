@@ -1,5 +1,5 @@
-use super::{BitFlags, Error, Register, DS1307};
-use hal::blocking::i2c::{Write, WriteRead};
+use crate::{BitFlags, Error, Register, DS1307};
+use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Square-wave output rate bits.
 #[derive(Debug, Clone, Copy, PartialEq)]

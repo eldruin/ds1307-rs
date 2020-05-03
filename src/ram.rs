@@ -1,5 +1,5 @@
-use super::{Error, Register, DEVICE_ADDRESS, DS1307};
-use hal::blocking::i2c::{Write, WriteRead};
+use crate::{Error, Register, DEVICE_ADDRESS, DS1307};
+use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
 

@@ -1,9 +1,7 @@
-extern crate ds1307;
-extern crate embedded_hal_mock as hal;
-use self::ds1307::Error;
-use self::hal::i2c::Transaction as I2cTrans;
+use ds1307::Error;
+use embedded_hal_mock::i2c::Transaction as I2cTrans;
 mod common;
-use common::{destroy, new, Register, ADDR};
+use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(get, get_month, 12, trans_read!(MONTH, [0b0001_0010]));
 

@@ -46,20 +46,17 @@ Please find additional examples using hardware in this repository: [driver-examp
 [driver-examples]: https://github.com/eldruin/driver-examples
 
 ```rust
-extern crate ds1307;
-extern crate linux_embedded_hal as hal;
-
 use ds1307::{DateTime, Hours, DS1307};
-use hal::I2cdev;
+use linux_embedded_hal::I2cdev;
 
 fn main() {
     let dev = I2cdev::new("/dev/i2c-1").unwrap();
     let mut rtc = DS1307::new(dev);
     let datetime = DateTime {
-        year: 2018,
-        month: 08,
-        day: 15,
-        weekday: 4,
+        year: 2020,
+        month: 5,
+        day: 2,
+        weekday: 6,
         hour: Hours::H24(19),
         minute: 59,
         second: 58,
@@ -101,7 +98,7 @@ fn main() {
             datetime.second
         ),
     }
-    // This will print something like: 2018-08-15, 4 19:59:58
+    // This will print something like: 2020-05-02, 6 19:59:58
 }
 ```
 
