@@ -194,12 +194,17 @@ where
     ///
     /// Will return an `Error::InvalidInputData` if any of the parameters is out of range.
     pub fn set_datetime(&mut self, datetime: &DateTime) -> Result<(), Error<E>> {
-        if datetime.year < 2000 || datetime.year > 2099 ||
-           datetime.month < 1   || datetime.month > 12  ||
-           datetime.day < 1     || datetime.day > 31    ||
-           datetime.weekday < 1 || datetime.weekday > 7 ||
-           datetime.minute > 59 ||
-           datetime.second > 59 {
+        if datetime.year < 2000
+            || datetime.year > 2099
+            || datetime.month < 1
+            || datetime.month > 12
+            || datetime.day < 1
+            || datetime.day > 31
+            || datetime.weekday < 1
+            || datetime.weekday > 7
+            || datetime.minute > 59
+            || datetime.second > 59
+        {
             return Err(Error::InvalidInputData);
         }
         let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
@@ -255,9 +260,9 @@ mod tests {
 
     #[test]
     fn can_convert_packed_bcd_to_decimal() {
-        assert_eq!(0,  packed_bcd_to_decimal(0b0000_0000));
-        assert_eq!(1,  packed_bcd_to_decimal(0b0000_0001));
-        assert_eq!(9,  packed_bcd_to_decimal(0b0000_1001));
+        assert_eq!(0, packed_bcd_to_decimal(0b0000_0000));
+        assert_eq!(1, packed_bcd_to_decimal(0b0000_0001));
+        assert_eq!(9, packed_bcd_to_decimal(0b0000_1001));
         assert_eq!(10, packed_bcd_to_decimal(0b0001_0000));
         assert_eq!(11, packed_bcd_to_decimal(0b0001_0001));
         assert_eq!(19, packed_bcd_to_decimal(0b0001_1001));
@@ -268,9 +273,9 @@ mod tests {
 
     #[test]
     fn can_convert_decimal_to_packed_bcd() {
-        assert_eq!(0b0000_0000, decimal_to_packed_bcd( 0));
-        assert_eq!(0b0000_0001, decimal_to_packed_bcd( 1));
-        assert_eq!(0b0000_1001, decimal_to_packed_bcd( 9));
+        assert_eq!(0b0000_0000, decimal_to_packed_bcd(0));
+        assert_eq!(0b0000_0001, decimal_to_packed_bcd(1));
+        assert_eq!(0b0000_1001, decimal_to_packed_bcd(9));
         assert_eq!(0b0001_0000, decimal_to_packed_bcd(10));
         assert_eq!(0b0001_0001, decimal_to_packed_bcd(11));
         assert_eq!(0b0001_1001, decimal_to_packed_bcd(19));

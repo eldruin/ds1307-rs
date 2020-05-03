@@ -180,28 +180,28 @@ pub enum Error<E> {
 struct Register;
 
 impl Register {
-    const SECONDS   : u8 = 0x00;
-    const MINUTES   : u8 = 0x01;
-    const HOURS     : u8 = 0x02;
-    const DOW       : u8 = 0x03;
-    const DOM       : u8 = 0x04;
-    const MONTH     : u8 = 0x05;
-    const YEAR      : u8 = 0x06;
-    const SQWOUT    : u8 = 0x07;
-    const RAM_BEGIN : u8 = 0x08;
-    const RAM_END   : u8 = 0x3F;
+    const SECONDS: u8 = 0x00;
+    const MINUTES: u8 = 0x01;
+    const HOURS: u8 = 0x02;
+    const DOW: u8 = 0x03;
+    const DOM: u8 = 0x04;
+    const MONTH: u8 = 0x05;
+    const YEAR: u8 = 0x06;
+    const SQWOUT: u8 = 0x07;
+    const RAM_BEGIN: u8 = 0x08;
+    const RAM_END: u8 = 0x3F;
 }
 
 struct BitFlags;
 
 impl BitFlags {
-    const H24_H12    : u8 = 0b0100_0000;
-    const AM_PM      : u8 = 0b0010_0000;
-    const CH         : u8 = 0b1000_0000;
-    const SQWE       : u8 = 0b0001_0000;
-    const OUTLEVEL   : u8 = 0b1000_0000;
-    const OUTRATERS0 : u8 = 0b0000_0001;
-    const OUTRATERS1 : u8 = 0b0000_0010;
+    const H24_H12: u8 = 0b0100_0000;
+    const AM_PM: u8 = 0b0010_0000;
+    const CH: u8 = 0b1000_0000;
+    const SQWE: u8 = 0b0001_0000;
+    const OUTLEVEL: u8 = 0b1000_0000;
+    const OUTRATERS0: u8 = 0b0000_0001;
+    const OUTRATERS1: u8 = 0b0000_0010;
 }
 
 const DEVICE_ADDRESS: u8 = 0b110_1000;
