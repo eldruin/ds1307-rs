@@ -139,18 +139,15 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{Ds1307, SQWOUTRateBits};
+//! use ds1307::{Ds1307, SqwOutRate};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //!
 //! rtc.enable_square_wave_output().unwrap();
-//! let rate_bits = SQWOUTRateBits {
-//!     rs0: true,
-//!     rs1: false
-//! };
-//! rtc.set_square_wave_output_rate(rate_bits).unwrap();
+//! let rate = SqwOutRate::Khz32_768;
+//! rtc.set_square_wave_output_rate(rate).unwrap();
 //! # }
 //! ```
 
@@ -181,7 +178,7 @@ pub use crate::datetime::{DateTime, Hours};
 mod ram;
 mod run;
 mod square_wave;
-pub use crate::square_wave::SQWOUTRateBits;
+pub use crate::square_wave::SqwOutRate;
 mod register_access;
 use register_access::{BitFlags, Register, ADDR};
 

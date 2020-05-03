@@ -1,13 +1,17 @@
 use crate::{BitFlags, Ds1307, Error, Register};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
-/// Square-wave output rate bits.
+/// Square-wave output rate
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SQWOUTRateBits {
-    /// Rate selection control bit 0.
-    pub rs0: bool,
-    /// Rate selection control bit 1.
-    pub rs1: bool,
+pub enum SqwOutRate {
+    /// 1 Hz
+    Hz1,
+    /// 4.096 kHz
+    Khz4_096,
+    /// 8.192 kHz
+    Khz8_192,
+    /// 32.768 kHz
+    Khz32_768,
 }
 
 impl<I2C, E> Ds1307<I2C>
@@ -62,34 +66,28 @@ where
     }
 
     /// Read square-wave output rate control bits.
-    pub fn get_square_wave_output_rate(&mut self) -> Result<SQWOUTRateBits, Error<E>> {
+    pub fn get_square_wave_output_rate(&mut self) -> Result<SqwOutRate, Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
-        Ok(SQWOUTRateBits {
-            rs0: (data & BitFlags::OUTRATERS0) != 0,
-            rs1: (data & BitFlags::OUTRATERS1) != 0,
-        })
+        let rs1 = (data & BitFlags::OUTRATERS1) != 0;
+        let rs0 = (data & BitFlags::OUTRATERS0) != 0;
+        match (rs1, rs0) {
+            (false, false) => Ok(SqwOutRate::Hz1),
+            (false, true) => Ok(SqwOutRate::Khz4_096),
+            (true, false) => Ok(SqwOutRate::Khz8_192),
+            (true, true) => Ok(SqwOutRate::Khz32_768),
+        }
     }
 
-    /// Set square-wave output rate control bits.
-    /// (Does not alter the device register if the same rate is already configured).
-    pub fn set_square_wave_output_rate(
-        &mut self,
-        rate_bits: SQWOUTRateBits,
-    ) -> Result<(), Error<E>> {
+    /// Set square-wave output rate.
+    pub fn set_square_wave_output_rate(&mut self, rate: SqwOutRate) -> Result<(), Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
-        if rate_bits.rs0 != ((data & BitFlags::OUTRATERS0) != 0)
-            || rate_bits.rs1 != ((data & BitFlags::OUTRATERS1) != 0)
-        {
-            let mut data = data & !(BitFlags::OUTRATERS0 | BitFlags::OUTRATERS1);
-            if rate_bits.rs0 {
-                data |= BitFlags::OUTRATERS0;
-            }
-            if rate_bits.rs1 {
-                data |= BitFlags::OUTRATERS1;
-            }
-            self.write_register(Register::SQWOUT, data)
-        } else {
-            Ok(())
-        }
+        let data = data & !BitFlags::OUTRATERS1 & !BitFlags::OUTRATERS0;
+        let sqwout = match rate {
+            SqwOutRate::Hz1 => data,
+            SqwOutRate::Khz4_096 => data | BitFlags::OUTRATERS0,
+            SqwOutRate::Khz8_192 => data | BitFlags::OUTRATERS1,
+            SqwOutRate::Khz32_768 => data | BitFlags::OUTRATERS1 | BitFlags::OUTRATERS0,
+        };
+        self.write_register(Register::SQWOUT, sqwout)
     }
 }
