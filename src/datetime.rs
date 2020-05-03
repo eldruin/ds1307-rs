@@ -207,11 +207,13 @@ where
         {
             return Err(Error::InvalidInputData);
         }
+        let hour = self.get_hours_register_value(datetime.hour)?;
         let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
         let payload = [
+            Register::SECONDS,
             decimal_to_packed_bcd(datetime.second) | ch_flag,
             decimal_to_packed_bcd(datetime.minute),
-            self.get_hours_register_value(datetime.hour)?,
+            hour,
             decimal_to_packed_bcd(datetime.weekday),
             decimal_to_packed_bcd(datetime.day),
             decimal_to_packed_bcd(datetime.month),
