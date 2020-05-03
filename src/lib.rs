@@ -178,7 +178,7 @@ pub use crate::datetime::{DateTime, Hours};
 mod ram;
 mod run;
 mod square_wave;
-pub use crate::square_wave::SqwOutRate;
+pub use crate::square_wave::{SqwOutLevel, SqwOutRate};
 mod register_access;
 use register_access::{BitFlags, Register, ADDR};
 

@@ -14,6 +14,15 @@ pub enum SqwOutRate {
     Khz32_768,
 }
 
+/// Square-wave output level
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum SqwOutLevel {
+    /// Low
+    Low,
+    /// High
+    High,
+}
+
 impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
@@ -36,32 +45,20 @@ where
     }
 
     /// Read status of square-wave output level control bit.
-    pub fn get_square_wave_output_level(&mut self) -> Result<bool, Error<E>> {
-        self.is_register_bit_flag_high(Register::SQWOUT, BitFlags::OUTLEVEL)
-    }
-
-    /// Set square-wave output level high.
-    /// (Does not alter the device register if level is already high).
-    pub fn set_square_wave_output_level_high(&mut self) -> Result<(), Error<E>> {
-        self.set_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
-    }
-
-    /// Set square-wave output level low.
-    /// (Does not alter the device register if level is already low).
-    pub fn set_square_wave_output_level_low(&mut self) -> Result<(), Error<E>> {
-        self.clear_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL)
+    pub fn get_square_wave_output_level(&mut self) -> Result<SqwOutLevel, Error<E>> {
+        if self.is_register_bit_flag_high(Register::SQWOUT, BitFlags::OUTLEVEL)? {
+            Ok(SqwOutLevel::High)
+        } else {
+            Ok(SqwOutLevel::Low)
+        }
     }
 
     /// Set square-wave output level.
     /// (Does not alter the device register if same level is already configured).
-    pub fn set_square_wave_output_level(
-        &mut self,
-        should_level_be_high: bool,
-    ) -> Result<(), Error<E>> {
-        if should_level_be_high {
-            self.set_square_wave_output_level_high()
-        } else {
-            self.set_square_wave_output_level_low()
+    pub fn set_square_wave_output_level(&mut self, level: SqwOutLevel) -> Result<(), Error<E>> {
+        match level {
+            SqwOutLevel::Low => self.clear_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL),
+            SqwOutLevel::High => self.set_register_bit_flag(Register::SQWOUT, BitFlags::OUTLEVEL),
         }
     }
 
