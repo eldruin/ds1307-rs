@@ -7,10 +7,10 @@
 //! - Read and write user RAM. See: [`read_ram()`].
 //! - Control square-wave output. See: [`enable_square_wave_output()`].
 //!
-//! [`get_datetime()`]: struct.DS1307.html#method.get_datetime
-//! [`set_running()`]: struct.DS1307.html#method.set_running
-//! [`read_ram()`]: struct.DS1307.html#method.read_ram
-//! [`enable_square_wave_output()`]: struct.DS1307.html#method.enable_square_wave_output
+//! [`get_datetime()`]: struct.Ds1307.html#method.get_datetime
+//! [`set_running()`]: struct.Ds1307.html#method.set_running
+//! [`read_ram()`]: struct.Ds1307.html#method.read_ram
+//! [`enable_square_wave_output()`]: struct.Ds1307.html#method.enable_square_wave_output
 //!
 //! ## The device
 //!
@@ -39,11 +39,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::DS1307;
+//! use ds1307::Ds1307;
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //! let year = rtc.get_year().unwrap();
 //! println!("Year: {}", year);
 //! # }
@@ -54,11 +54,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::DS1307;
+//! use ds1307::Ds1307;
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //! rtc.set_year(2018).unwrap();
 //! # }
 //! ```
@@ -68,11 +68,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{DS1307, DateTime, Hours};
+//! use ds1307::{Ds1307, DateTime, Hours};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //! let datetime = DateTime {
 //!                           year: 2018,
 //!                           month: 08,
@@ -90,11 +90,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{DS1307, Hours};
+//! use ds1307::{Ds1307, Hours};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //!
 //! let datetime = rtc.get_datetime().unwrap();
 //!
@@ -118,11 +118,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::DS1307;
+//! use ds1307::Ds1307;
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //!
 //! let data = [171; 3];
 //! rtc.write_ram(2, &data).unwrap();
@@ -139,11 +139,11 @@
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{DS1307, SQWOUTRateBits};
+//! use ds1307::{Ds1307, SQWOUTRateBits};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = DS1307::new(dev);
+//! let mut rtc = Ds1307::new(dev);
 //!
 //! rtc.enable_square_wave_output().unwrap();
 //! let rate_bits = SQWOUTRateBits {
@@ -200,7 +200,7 @@ const DEVICE_ADDRESS: u8 = 0b110_1000;
 
 /// DS1307 driver
 #[derive(Debug, Default)]
-pub struct DS1307<I2C> {
+pub struct Ds1307<I2C> {
     /// The concrete I²C device implementation.
     i2c: I2C,
 }
@@ -212,13 +212,13 @@ mod run;
 mod square_wave;
 pub use crate::square_wave::SQWOUTRateBits;
 
-impl<I2C, E> DS1307<I2C>
+impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Create a new instance.
     pub fn new(i2c: I2C) -> Self {
-        DS1307 { i2c }
+        Ds1307 { i2c }
     }
 
     /// Destroy driver instance, return I²C bus instance.

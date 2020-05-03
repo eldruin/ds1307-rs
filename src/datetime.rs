@@ -1,4 +1,4 @@
-use crate::{BitFlags, Error, Register, DEVICE_ADDRESS, DS1307};
+use crate::{BitFlags, Error, Register, DEVICE_ADDRESS, Ds1307};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
@@ -31,7 +31,7 @@ pub struct DateTime {
     pub second: u8,
 }
 
-impl<I2C, E> DS1307<I2C>
+impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {

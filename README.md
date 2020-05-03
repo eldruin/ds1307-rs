@@ -45,12 +45,12 @@ Please find additional examples using hardware in this repository: [driver-examp
 [driver-examples]: https://github.com/eldruin/driver-examples
 
 ```rust
-use ds1307::{DateTime, Hours, DS1307};
+use ds1307::{DateTime, Hours, Ds1307};
 use linux_embedded_hal::I2cdev;
 
 fn main() {
     let dev = I2cdev::new("/dev/i2c-1").unwrap();
-    let mut rtc = DS1307::new(dev);
+    let mut rtc = Ds1307::new(dev);
     let datetime = DateTime {
         year: 2020,
         month: 5,

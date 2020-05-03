@@ -1,4 +1,4 @@
-use crate::{BitFlags, Error, Register, DS1307};
+use crate::{BitFlags, Error, Register, Ds1307};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Square-wave output rate bits.
@@ -10,7 +10,7 @@ pub struct SQWOUTRateBits {
     pub rs1: bool,
 }
 
-impl<I2C, E> DS1307<I2C>
+impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
