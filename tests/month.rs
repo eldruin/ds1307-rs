@@ -1,32 +1,13 @@
 extern crate ds1307;
-
+extern crate embedded_hal_mock as hal;
+use self::ds1307::Error;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const MONTH_REGISTER: u8 = 0x05;
+get_test!(get, get_month, 12, trans_read!(MONTH, [0b0001_0010]));
 
-#[test]
-fn can_read_month() {
-    let mut rtc = setup(&[0b0001_0010]);
-    assert_eq!(12, rtc.get_month().unwrap());
-    check_sent_data(rtc, &[MONTH_REGISTER]);
-}
+set_invalid_test!(too_small, set_month, 0);
+set_invalid_test!(too_big, set_month, 13);
 
-#[test]
-fn too_small_month_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_month(0));
-}
-
-#[test]
-fn too_big_month_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_month(13));
-}
-
-#[test]
-fn can_write_month() {
-    let mut rtc = setup(&[0]);
-    rtc.set_month(12).unwrap();
-    check_sent_data(rtc, &[MONTH_REGISTER, 0b0001_0010]);
-}
+set_test!(set, set_month, 12, trans_write!(MONTH, [0b0001_0010]));

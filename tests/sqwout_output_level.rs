@@ -1,70 +1,45 @@
 extern crate ds1307;
-
-#[allow(dead_code)]
+extern crate embedded_hal_mock as hal;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const SQWOUT_REGISTER: u8 = 0x07;
+get_test!(
+    get_high,
+    get_square_wave_output_level,
+    true,
+    trans_read!(SQWOUT, [0b1000_0000])
+);
+get_test!(
+    get_low,
+    get_square_wave_output_level,
+    false,
+    trans_read!(SQWOUT, [0])
+);
 
 #[test]
-fn can_read_output_level_low() {
-    let mut rtc = setup(&[0]);
-    assert!(!rtc.get_square_wave_output_level().unwrap());
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
+fn set_low() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b1001_0011]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b0001_0011]),
+    ]);
+    dev.set_square_wave_output_level(false).unwrap();
+    destroy(dev);
 }
 
 #[test]
-fn can_read_output_level_high() {
-    let mut rtc = setup(&[0b1000_0000]);
-    assert!(rtc.get_square_wave_output_level().unwrap());
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
+fn set_high() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b0001_0011]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b1001_0011]),
+    ]);
+    dev.set_square_wave_output_level(true).unwrap();
+    destroy(dev);
 }
 
 #[test]
-fn can_write_low_output_level() {
-    let mut rtc = setup(&[0b1000_0000]);
-    rtc.set_square_wave_output_level_low().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0]);
-}
-
-#[test]
-fn when_already_low_then_set_level_low_does_nothing() {
-    let mut rtc = setup(&[0]);
-    rtc.set_square_wave_output_level_low().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
-}
-
-#[test]
-fn can_write_high_output_level() {
-    let mut rtc = setup(&[0]);
-    rtc.set_square_wave_output_level_high().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b1000_0000]);
-}
-
-#[test]
-fn when_already_high_then_set_level_low_does_nothing() {
-    let mut rtc = setup(&[0b1000_0000]);
-    rtc.set_square_wave_output_level_high().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
-}
-
-#[test]
-fn can_write_output_level_parameter_low() {
-    let mut rtc = setup(&[0b1000_0000]);
-    rtc.set_square_wave_output_level(false).unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0]);
-}
-
-#[test]
-fn can_write_output_level_parameter_high() {
-    let mut rtc = setup(&[0]);
-    rtc.set_square_wave_output_level(true).unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b1000_0000]);
-}
-
-#[test]
-fn write_output_level_keeps_status_of_other_flags() {
-    let mut rtc = setup(&[0b1001_0011]);
-    rtc.set_square_wave_output_level(false).unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b0001_0011]);
+fn set_does_nothing_if_matches() {
+    let mut dev = new(&trans_read!(SQWOUT, [0b1001_0011]));
+    dev.set_square_wave_output_level(true).unwrap();
+    destroy(dev);
 }

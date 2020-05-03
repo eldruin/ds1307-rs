@@ -1,39 +1,42 @@
 extern crate ds1307;
-
+use ds1307::Error;
+extern crate embedded_hal_mock as hal;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const SECONDS_REGISTER: u8 = 0x00;
+get_test!(
+    can_read_seconds,
+    get_seconds,
+    59,
+    trans_read!(SECONDS, [0b0101_1001])
+);
 
-#[test]
-fn can_read_seconds() {
-    let mut rtc = setup(&[0b0101_1001]);
-    assert_eq!(59, rtc.get_seconds().unwrap());
-    check_sent_data(rtc, &[0]);
-}
+get_test!(
+    ch_bit_is_ignored,
+    get_seconds,
+    59,
+    trans_read!(SECONDS, [0b1101_1001])
+);
 
-#[test]
-fn ch_bit_is_ignored() {
-    let mut rtc = setup(&[0b1101_1001]);
-    assert_eq!(59, rtc.get_seconds().unwrap());
-}
+set_invalid_test!(wrong_seconds_returns_error, set_seconds, 60);
 
-#[test]
-fn wrong_seconds_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_seconds(60));
-}
+set_test!(
+    can_write_seconds,
+    set_seconds,
+    59,
+    [
+        I2cTrans::write_read(ADDR, vec![Register::SECONDS], vec![0]),
+        I2cTrans::write(ADDR, vec![Register::SECONDS, 0b0101_1001])
+    ]
+);
 
-#[test]
-fn can_write_seconds() {
-    let mut rtc = setup(&[0]);
-    rtc.set_seconds(59).unwrap();
-    check_sent_data(rtc, &[SECONDS_REGISTER, 0b0101_1001]);
-}
-
-#[test]
-fn ch_bit_is_kept_when_writing_seconds() {
-    let mut rtc = setup(&[0b1000_0000]);
-    rtc.set_seconds(59).unwrap();
-    check_sent_data(rtc, &[SECONDS_REGISTER, 0b1101_1001]);
-}
+set_test!(
+    ch_bit_is_kept_when_writing_seconds,
+    set_seconds,
+    59,
+    [
+        I2cTrans::write_read(ADDR, vec![Register::SECONDS], vec![0b1000_0000]),
+        I2cTrans::write(ADDR, vec![Register::SECONDS, 0b1101_1001])
+    ]
+);

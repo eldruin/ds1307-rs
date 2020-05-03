@@ -1,32 +1,13 @@
 extern crate ds1307;
-
+extern crate embedded_hal_mock as hal;
+use self::ds1307::Error;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const DOM_REGISTER: u8 = 0x04;
+get_test!(can_read_dom, get_day, 31, trans_read!(DOM, [0b0011_0001]));
 
-#[test]
-fn can_read_day_of_month() {
-    let mut rtc = setup(&[0b0011_0001]);
-    assert_eq!(31, rtc.get_day().unwrap());
-    check_sent_data(rtc, &[DOM_REGISTER]);
-}
+set_invalid_test!(too_small, set_day, 0);
+set_invalid_test!(too_big, set_day, 32);
 
-#[test]
-fn too_small_day_of_month_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_day(0));
-}
-
-#[test]
-fn too_big_day_of_month_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_day(32));
-}
-
-#[test]
-fn can_write_day_of_month() {
-    let mut rtc = setup(&[0]);
-    rtc.set_day(7).unwrap();
-    check_sent_data(rtc, &[DOM_REGISTER, 0b0000_0111]);
-}
+set_test!(can_set_dom, set_day, 7, trans_write!(DOM, [0b0000_0111]));

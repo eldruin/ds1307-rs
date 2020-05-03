@@ -1,30 +1,37 @@
 extern crate ds1307;
-use ds1307::{DateTime, Hours};
-
+use ds1307::{DateTime, Error, Hours};
+extern crate embedded_hal_mock as hal;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-#[test]
-fn can_read_datetime() {
-    let mut rtc = setup(&[
-        0b1101_1000,
-        0b0101_1001,
-        0b0010_0011,
-        0b0000_0010,
-        0b0001_0011,
-        0b0000_1000,
-        0b0001_1000,
-    ]);
-    let datetime = rtc.get_datetime().unwrap();
-    assert_eq!(2018, datetime.year);
-    assert_eq!(08, datetime.month);
-    assert_eq!(13, datetime.day);
-    assert_eq!(2, datetime.weekday);
-    check_hours!(datetime.hour, H24, 23);
-    assert_eq!(59, datetime.minute);
-    assert_eq!(58, datetime.second);
-    check_sent_data(rtc, &[0x00]);
-}
+const DT: DateTime = DateTime {
+    year: 2018,
+    month: 8,
+    day: 13,
+    weekday: 2,
+    hour: Hours::H24(23),
+    minute: 59,
+    second: 58,
+};
+
+get_test!(
+    read_datetime,
+    get_datetime,
+    DT,
+    trans_read!(
+        SECONDS,
+        [
+            0b1101_1000,
+            0b0101_1001,
+            0b0010_0011,
+            0b0000_0010,
+            0b0001_0011,
+            0b0000_1000,
+            0b0001_1000
+        ]
+    )
+);
 
 fn get_valid_datetime() -> DateTime {
     DateTime {
@@ -42,10 +49,11 @@ fn check_set_datetime<F>(mut f: F)
 where
     F: FnMut(&mut DateTime),
 {
-    let mut rtc = setup(&[0]);
+    let mut rtc = new(&[]);
     let mut dt = get_valid_datetime();
     f(&mut dt);
-    assert_invalid_input_data_error(rtc.set_datetime(&dt));
+    assert_invalid_input_data!(rtc.set_datetime(&dt));
+    destroy(rtc);
 }
 
 #[test]
@@ -92,29 +100,24 @@ fn wrong_second_returns_error() {
 }
 
 #[test]
-fn when_set_datetime_ch_bit_is_unchanged() {
-    let mut rtc = setup(&[0b1101_1000]);
-    let dt = get_valid_datetime();
-    rtc.set_datetime(&dt).unwrap();
-    let dev = rtc.destroy();
-    assert_eq!(dev.get_write_data()[0], 0b1101_1000);
-}
-
-#[test]
 fn can_set_datetime() {
-    let mut rtc = setup(&[0b1101_1000]);
+    let mut rtc = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SECONDS], vec![0b1101_1000]),
+        I2cTrans::write(
+            ADDR,
+            vec![
+                Register::SECONDS,
+                0b1101_1000,
+                0b0101_1001,
+                0b0010_0011,
+                0b0000_0111,
+                0b0011_0001,
+                0b0001_0010,
+                0b1001_1001,
+            ],
+        ),
+    ]);
     let dt = get_valid_datetime();
     rtc.set_datetime(&dt).unwrap();
-    check_sent_data(
-        rtc,
-        &[
-            0b1101_1000,
-            0b0101_1001,
-            0b0010_0011,
-            0b0000_0111,
-            0b0011_0001,
-            0b0001_0010,
-            0b1001_1001,
-        ],
-    );
+    destroy(rtc);
 }

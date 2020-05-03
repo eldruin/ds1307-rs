@@ -1,63 +1,52 @@
 extern crate ds1307;
-
-#[allow(dead_code)]
+extern crate embedded_hal_mock as hal;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const SQWOUT_REGISTER: u8 = 0x07;
-
-#[test]
-fn can_read_is_not_enabled() {
-    let mut rtc = setup(&[0b0000_0000]);
-    assert!(!rtc.is_square_wave_output_enabled().unwrap());
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
-}
-
-#[test]
-fn can_read_is_enabled() {
-    let mut rtc = setup(&[0b0001_0000]);
-    assert!(rtc.is_square_wave_output_enabled().unwrap());
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
-}
+get_test!(
+    sqwout_enabled,
+    is_square_wave_output_enabled,
+    true,
+    trans_read!(SQWOUT, [0b0001_0000])
+);
+get_test!(
+    sqwout_disabled,
+    is_square_wave_output_enabled,
+    false,
+    trans_read!(SQWOUT, [0])
+);
 
 #[test]
-fn can_enable() {
-    let mut rtc = setup(&[0]);
-    rtc.enable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b0001_0000]);
-}
-
-#[test]
-fn enable_keeps_status_of_other_flags() {
-    let mut rtc = setup(&[0b1000_0011]);
-    rtc.enable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b1001_0011]);
+fn enable() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b1000_0011]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b1001_0011]),
+    ]);
+    dev.enable_square_wave_output().unwrap();
+    destroy(dev);
 }
 
 #[test]
 fn when_already_enabled_then_enable_does_nothing() {
-    let mut rtc = setup(&[0b0001_0000]);
-    rtc.enable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
+    let mut dev = new(&trans_read!(SQWOUT, [0b0001_0000]));
+    dev.enable_square_wave_output().unwrap();
+    destroy(dev);
 }
 
 #[test]
-fn can_disable() {
-    let mut rtc = setup(&[0b0001_0000]);
-    rtc.disable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0]);
-}
-
-#[test]
-fn disable_keeps_status_of_other_flags() {
-    let mut rtc = setup(&[0b1001_0011]);
-    rtc.disable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b1000_0011]);
+fn disable() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b1001_0011]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b1000_0011]),
+    ]);
+    dev.disable_square_wave_output().unwrap();
+    destroy(dev);
 }
 
 #[test]
 fn when_already_disabled_then_disable_does_nothing() {
-    let mut rtc = setup(&[0]);
-    rtc.disable_square_wave_output().unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
+    let mut dev = new(&trans_read!(SQWOUT, [0]));
+    dev.disable_square_wave_output().unwrap();
+    destroy(dev);
 }

@@ -1,32 +1,13 @@
 extern crate ds1307;
-
+extern crate embedded_hal_mock as hal;
+use self::ds1307::Error;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const DOW_REGISTER: u8 = 0x03;
+get_test!(can_read_wd, get_weekday, 7, trans_read!(DOW, [7]));
 
-#[test]
-fn can_read_weekday() {
-    let mut rtc = setup(&[7]);
-    assert_eq!(7, rtc.get_weekday().unwrap());
-    check_sent_data(rtc, &[DOW_REGISTER]);
-}
+set_invalid_test!(too_small, set_weekday, 0);
+set_invalid_test!(too_big, set_weekday, 8);
 
-#[test]
-fn too_small_weekday_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_weekday(0));
-}
-
-#[test]
-fn too_big_weekday_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_weekday(8));
-}
-
-#[test]
-fn can_write_weekday() {
-    let mut rtc = setup(&[0]);
-    rtc.set_weekday(7).unwrap();
-    check_sent_data(rtc, &[DOW_REGISTER, 0b0000_0111]);
-}
+set_test!(can_set_wd, set_weekday, 7, trans_write!(DOW, [0b0000_0111]));

@@ -1,61 +1,55 @@
 extern crate ds1307;
 use ds1307::SQWOUTRateBits;
-
-#[allow(dead_code)]
+extern crate embedded_hal_mock as hal;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const SQWOUT_REGISTER: u8 = 0x07;
+get_test!(
+    get_01,
+    get_square_wave_output_rate,
+    SQWOUTRateBits {
+        rs0: false,
+        rs1: true
+    },
+    trans_read!(SQWOUT, [0b0000_0010])
+);
 
 #[test]
-fn can_read_output_rate() {
-    let mut rtc = setup(&[0b0000_0010]);
-    let rate = rtc.get_square_wave_output_rate().unwrap();
-    assert_eq!(false, rate.rs0);
-    assert_eq!(true, rate.rs1);
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
+fn set_00() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b1001_0010]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b1001_0000]),
+    ]);
+    dev.set_square_wave_output_rate(SQWOUTRateBits {
+        rs0: false,
+        rs1: false,
+    })
+    .unwrap();
+    destroy(dev);
 }
 
 #[test]
-fn can_set_output_rate_to_11() {
-    let mut rtc = setup(&[0b0000_0010]);
-    rtc.set_square_wave_output_rate(SQWOUTRateBits {
+fn set_11() {
+    let mut dev = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SQWOUT], vec![0b1001_0010]),
+        I2cTrans::write(ADDR, vec![Register::SQWOUT, 0b1001_0011]),
+    ]);
+    dev.set_square_wave_output_rate(SQWOUTRateBits {
         rs0: true,
         rs1: true,
     })
     .unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b0000_0011]);
+    destroy(dev);
 }
 
 #[test]
-fn can_set_output_rate_00() {
-    let mut rtc = setup(&[0b0000_0001]);
-    rtc.set_square_wave_output_rate(SQWOUTRateBits {
-        rs0: false,
-        rs1: false,
-    })
-    .unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b0000_0000]);
-}
-
-#[test]
-fn set_output_rate_to_same_rate_does_nothing() {
-    let mut rtc = setup(&[0b0000_0001]);
-    rtc.set_square_wave_output_rate(SQWOUTRateBits {
+fn set_does_nothing_if_matches() {
+    let mut dev = new(&trans_read!(SQWOUT, [0b0000_0011]));
+    dev.set_square_wave_output_rate(SQWOUTRateBits {
         rs0: true,
-        rs1: false,
+        rs1: true,
     })
     .unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER]);
-}
-
-#[test]
-fn set_output_rate_keeps_status_of_other_flags() {
-    let mut rtc = setup(&[0b1001_0011]);
-    rtc.set_square_wave_output_rate(SQWOUTRateBits {
-        rs0: false,
-        rs1: false,
-    })
-    .unwrap();
-    check_sent_data(rtc, &[SQWOUT_REGISTER, 0b1001_0000]);
+    destroy(dev);
 }

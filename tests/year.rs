@@ -1,32 +1,13 @@
 extern crate ds1307;
-
+extern crate embedded_hal_mock as hal;
+use self::ds1307::Error;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const YEAR_REGISTER: u8 = 0x06;
+get_test!(get, get_year, 2099, trans_read!(YEAR, [0b1001_1001]));
 
-#[test]
-fn can_read_year() {
-    let mut rtc = setup(&[0b1001_1001]);
-    assert_eq!(2099, rtc.get_year().unwrap());
-    check_sent_data(rtc, &[YEAR_REGISTER]);
-}
+set_invalid_test!(too_small, set_year, 1999);
+set_invalid_test!(too_big, set_year, 2100);
 
-#[test]
-fn too_small_year_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_year(1999));
-}
-
-#[test]
-fn too_big_year_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_year(2100));
-}
-
-#[test]
-fn can_write_year() {
-    let mut rtc = setup(&[0]);
-    rtc.set_year(2099).unwrap();
-    check_sent_data(rtc, &[YEAR_REGISTER, 0b1001_1001]);
-}
+set_test!(set, set_year, 2099, trans_write!(YEAR, [0b1001_1001]));

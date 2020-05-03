@@ -1,26 +1,22 @@
 extern crate ds1307;
-
+extern crate embedded_hal_mock as hal;
+use self::ds1307::Error;
+use self::hal::i2c::Transaction as I2cTrans;
 mod common;
-use common::{assert_invalid_input_data_error, check_sent_data, setup};
+use common::{destroy, new, Register, ADDR};
 
-const MINUTES_REGISTER: u8 = 0x01;
+get_test!(
+    can_read_minutes,
+    get_minutes,
+    59,
+    trans_read!(MINUTES, [0b0101_1001])
+);
 
-#[test]
-fn can_read_minutes() {
-    let mut rtc = setup(&[0b0101_1001]);
-    assert_eq!(59, rtc.get_minutes().unwrap());
-    check_sent_data(rtc, &[MINUTES_REGISTER]);
-}
+set_invalid_test!(wrong_returns_error, set_minutes, 60);
 
-#[test]
-fn wrong_minutes_returns_error() {
-    let mut rtc = setup(&[0]);
-    assert_invalid_input_data_error(rtc.set_minutes(60));
-}
-
-#[test]
-fn can_write_minutes() {
-    let mut rtc = setup(&[0]);
-    rtc.set_minutes(59).unwrap();
-    check_sent_data(rtc, &[MINUTES_REGISTER, 0b0101_1001]);
-}
+set_test!(
+    can_write_minutes,
+    set_minutes,
+    59,
+    trans_write!(MINUTES, [0b0101_1001])
+);
