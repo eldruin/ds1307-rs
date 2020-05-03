@@ -1,4 +1,4 @@
-use crate::{Error, Register, DEVICE_ADDRESS, Ds1307};
+use crate::{Ds1307, Error, Register, ADDR};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
@@ -20,11 +20,7 @@ where
         }
         self.check_ram_parameters(address_offset, &data)?;
         self.i2c
-            .write_read(
-                DEVICE_ADDRESS,
-                &[Register::RAM_BEGIN + address_offset],
-                &mut data[..],
-            )
+            .write_read(ADDR, &[Register::RAM_BEGIN + address_offset], &mut data[..])
             .map_err(Error::I2C)
     }
 
@@ -44,7 +40,7 @@ where
         payload[0] = Register::RAM_BEGIN + address_offset;
         payload[1..=data.len()].copy_from_slice(&data);
         self.i2c
-            .write(DEVICE_ADDRESS, &payload[..=data.len()])
+            .write(ADDR, &payload[..=data.len()])
             .map_err(Error::I2C)
     }
 

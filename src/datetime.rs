@@ -1,4 +1,4 @@
-use crate::{BitFlags, Error, Register, DEVICE_ADDRESS, Ds1307};
+use crate::{BitFlags, Ds1307, Error, Register, ADDR};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Hours in either 12-hour (AM/PM) or 24-hour format
@@ -91,7 +91,7 @@ where
     pub fn get_datetime(&mut self) -> Result<DateTime, Error<E>> {
         let mut data = [0; 7];
         self.i2c
-            .write_read(DEVICE_ADDRESS, &[0x00], &mut data)
+            .write_read(ADDR, &[0x00], &mut data)
             .map_err(Error::I2C)?;
         Ok(DateTime {
             year: 2000 + u16::from(packed_bcd_to_decimal(data[Register::YEAR as usize])),
@@ -219,7 +219,7 @@ where
             decimal_to_packed_bcd(datetime.month),
             decimal_to_packed_bcd((datetime.year - 2000) as u8),
         ];
-        self.i2c.write(DEVICE_ADDRESS, &payload).map_err(Error::I2C)
+        self.i2c.write(ADDR, &payload).map_err(Error::I2C)
     }
 
     fn read_register_decimal(&mut self, register: u8) -> Result<u8, Error<E>> {

@@ -1,4 +1,4 @@
-use ds1307::{DateTime, Hours, Ds1307};
+use ds1307::{DateTime, Ds1307, Hours};
 use linux_embedded_hal::I2cdev;
 
 fn main() {

@@ -1,4 +1,5 @@
-use crate::{BitFlags, Error, Register, Ds1307};use embedded_hal::blocking::i2c::{Write, WriteRead};
+use crate::{BitFlags, Ds1307, Error, Register};
+use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 impl<I2C, E> Ds1307<I2C>
 where
