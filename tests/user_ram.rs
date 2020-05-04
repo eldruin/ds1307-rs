@@ -56,25 +56,14 @@ fn can_read_last_ram_address() {
     destroy(rtc);
 }
 
-set_invalid_test!(
-    write_too_much_data,
-    write_ram,
-    0,
-    &mut [0; RAM_BYTE_COUNT + 1]
-);
-set_invalid_test!(
-    write_too_big_offset,
-    write_ram,
-    RAM_BYTE_COUNT as u8,
-    &mut [0]
-);
-set_invalid_test!(write_overflow, write_ram, 1, &mut [0; RAM_BYTE_COUNT]);
+set_invalid_test!(write_too_much_data, write_ram, 0, &[0; RAM_BYTE_COUNT + 1]);
+set_invalid_test!(write_too_big_offset, write_ram, RAM_BYTE_COUNT as u8, &[0]);
+set_invalid_test!(write_overflow, write_ram, 1, &[0; RAM_BYTE_COUNT]);
 
 #[test]
 fn empty_data_write_does_nothing() {
     let mut rtc = new(&[]);
-    let mut data = [];
-    rtc.write_ram(0, &mut data).unwrap();
+    rtc.write_ram(0, &[]).unwrap();
     destroy(rtc);
 }
 
