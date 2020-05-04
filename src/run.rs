@@ -6,8 +6,8 @@ where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Read if the clock is running.
-    pub fn is_running(&mut self) -> Result<bool, Error<E>> {
-        self.is_register_bit_flag_high(Register::SECONDS, BitFlags::CH)
+    pub fn running(&mut self) -> Result<bool, Error<E>> {
+        self.register_bit_flag_high(Register::SECONDS, BitFlags::CH)
     }
 
     /// Set the clock to run (default on power-on).

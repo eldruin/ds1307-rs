@@ -4,13 +4,13 @@ use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(
     sqwout_enabled,
-    is_square_wave_output_enabled,
+    square_wave_output_enabled,
     true,
     trans_read!(SQWOUT, [0b0001_0000])
 );
 get_test!(
     sqwout_disabled,
-    is_square_wave_output_enabled,
+    square_wave_output_enabled,
     false,
     trans_read!(SQWOUT, [0])
 );

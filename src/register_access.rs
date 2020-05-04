@@ -32,7 +32,7 @@ impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
-    pub(crate) fn is_register_bit_flag_high(
+    pub(crate) fn register_bit_flag_high(
         &mut self,
         address: u8,
         bitmask: u8,

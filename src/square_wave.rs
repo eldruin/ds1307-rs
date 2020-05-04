@@ -28,8 +28,8 @@ where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     /// Read whether the square-wave output is enabled.
-    pub fn is_square_wave_output_enabled(&mut self) -> Result<bool, Error<E>> {
-        self.is_register_bit_flag_high(Register::SQWOUT, BitFlags::SQWE)
+    pub fn square_wave_output_enabled(&mut self) -> Result<bool, Error<E>> {
+        self.register_bit_flag_high(Register::SQWOUT, BitFlags::SQWE)
     }
 
     /// Enable the square-wave output.
@@ -46,7 +46,7 @@ where
 
     /// Read status of square-wave output level control bit.
     pub fn get_square_wave_output_level(&mut self) -> Result<SqwOutLevel, Error<E>> {
-        if self.is_register_bit_flag_high(Register::SQWOUT, BitFlags::OUTLEVEL)? {
+        if self.register_bit_flag_high(Register::SQWOUT, BitFlags::OUTLEVEL)? {
             Ok(SqwOutLevel::High)
         } else {
             Ok(SqwOutLevel::Low)
