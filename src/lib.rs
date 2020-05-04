@@ -167,7 +167,7 @@ mod run;
 mod square_wave;
 pub use crate::square_wave::{SqwOutLevel, SqwOutRate};
 mod register_access;
-use register_access::{BitFlags, Register, ADDR};
+use crate::register_access::{BitFlags, Register, ADDR};
 
 impl<I2C, E> Ds1307<I2C>
 where
