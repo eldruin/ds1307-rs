@@ -43,12 +43,10 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::{Ds1307, Rtcc};
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //! let year = rtc.get_year().unwrap();
 //! println!("Year: {}", year);
-//! # }
 //! ```
 //!
 //! ### Set the year
@@ -59,11 +57,9 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::{Ds1307, Rtcc};
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //! rtc.set_year(2018).unwrap();
-//! # }
 //! ```
 //!
 //! ### Set and get the current date and time at once
@@ -72,7 +68,6 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::{Ds1307, NaiveDate, Rtcc};
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //! let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
@@ -81,7 +76,6 @@
 //! let datetime = rtc.get_datetime().unwrap();
 //! println!("{}", datetime);
 //! // This will print something like: 2020-05-02 19:59:58
-//! # }
 //! ```
 //!
 //! ### Get the current date
@@ -93,12 +87,10 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::{Ds1307, Rtcc};
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //! let date = rtc.get_date().unwrap();
 //! println!("{}", date);
-//! # }
 //! ```
 //!
 //! ### Read and write user RAM
@@ -107,7 +99,6 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::Ds1307;
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //!
@@ -119,7 +110,6 @@
 //!
 //! println!("{}, {}, {}", data[0], data[1], data[2]);
 //! // This will print: 171, 171, 171
-//! # }
 //! ```
 //!
 //! ### Enable square-wave output and select rate
@@ -128,14 +118,12 @@
 //! use linux_embedded_hal as hal;
 //! use ds1307::{Ds1307, SqwOutRate};
 //!
-//! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //!
 //! rtc.enable_square_wave_output().unwrap();
 //! let rate = SqwOutRate::Khz32_768;
 //! rtc.set_square_wave_output_rate(rate).unwrap();
-//! # }
 //! ```
 
 #![deny(unsafe_code)]
