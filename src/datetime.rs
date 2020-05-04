@@ -167,7 +167,7 @@ where
         if day < 1 || day > 31 {
             return Err(Error::InvalidInputData);
         }
-        self.write_register(Register::DOM, day)
+        self.write_register_decimal(Register::DOM, day)
     }
 
     /// Set the month [1-12].
