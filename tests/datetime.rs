@@ -1,4 +1,4 @@
-use ds1307::{Error, NaiveDate, NaiveDateTime, Rtcc};
+use ds1307::{Error, NaiveDate, NaiveDateTime, NaiveTime, Rtcc};
 use embedded_hal_mock::i2c::Transaction as I2cTrans;
 mod common;
 use crate::common::{destroy, new, Register, ADDR};
@@ -8,7 +8,7 @@ fn get_valid_datetime() -> NaiveDateTime {
 }
 
 #[test]
-fn read_datetime() {
+fn get_datetime() {
     let mut dev = new(&trans_read!(
         SECONDS,
         [
@@ -22,6 +22,23 @@ fn read_datetime() {
         ]
     ));
     assert_eq!(get_valid_datetime(), dev.get_datetime().unwrap());
+    destroy(dev);
+}
+
+#[test]
+fn get_date() {
+    let mut dev = new(&trans_read!(DOM, [0b0001_0011, 0b0000_1000, 0b0001_1000]));
+    assert_eq!(NaiveDate::from_ymd(2018, 8, 13), dev.get_date().unwrap());
+    destroy(dev);
+}
+
+#[test]
+fn get_time() {
+    let mut dev = new(&trans_read!(
+        SECONDS,
+        [0b1101_1000, 0b0101_1001, 0b0010_0011]
+    ));
+    assert_eq!(NaiveTime::from_hms(23, 59, 58), dev.get_time().unwrap());
     destroy(dev);
 }
 
@@ -56,6 +73,29 @@ fn can_set_datetime() {
     ]);
     let dt = get_valid_datetime();
     rtc.set_datetime(&dt).unwrap();
+    destroy(rtc);
+}
+
+#[test]
+fn can_set_time() {
+    let mut rtc = new(&[
+        I2cTrans::write_read(ADDR, vec![Register::SECONDS], vec![0b1101_1000]),
+        I2cTrans::write(
+            ADDR,
+            vec![Register::SECONDS, 0b1101_1000, 0b0101_1001, 0b0010_0011],
+        ),
+    ]);
+    rtc.set_time(&NaiveTime::from_hms(23, 59, 58)).unwrap();
+    destroy(rtc);
+}
+
+#[test]
+fn can_set_date() {
+    let mut rtc = new(&trans_write!(
+        DOW,
+        [0b0000_0010, 0b0001_0011, 0b0000_1000, 0b0001_1000]
+    ));
+    rtc.set_date(&NaiveDate::from_ymd(2018, 8, 13)).unwrap();
     destroy(rtc);
 }
 
