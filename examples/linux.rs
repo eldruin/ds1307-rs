@@ -1,54 +1,13 @@
-use ds1307::{DateTime, Ds1307, Hours};
+use ds1307::{Ds1307, NaiveDate, Rtcc};
 use linux_embedded_hal::I2cdev;
 
 fn main() {
     let dev = I2cdev::new("/dev/i2c-1").unwrap();
     let mut rtc = Ds1307::new(dev);
-    let datetime = DateTime {
-        year: 2020,
-        month: 5,
-        day: 2,
-        weekday: 6,
-        hour: Hours::H24(19),
-        minute: 59,
-        second: 58,
-    };
+    let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
     rtc.set_datetime(&datetime).unwrap();
-
+    // ...
     let datetime = rtc.get_datetime().unwrap();
-
-    // The hours depend on the RTC running mode.
-    match datetime.hour {
-        Hours::H24(h) => println!(
-            "{}-{}-{}, {} {}:{}:{}",
-            datetime.year,
-            datetime.month,
-            datetime.day,
-            datetime.weekday,
-            h,
-            datetime.minute,
-            datetime.second
-        ),
-        Hours::AM(h) => println!(
-            "{}-{}-{}, {} {}:{}:{} AM",
-            datetime.year,
-            datetime.month,
-            datetime.day,
-            datetime.weekday,
-            h,
-            datetime.minute,
-            datetime.second
-        ),
-        Hours::PM(h) => println!(
-            "{}-{}-{}, {} {}:{}:{} PM",
-            datetime.year,
-            datetime.month,
-            datetime.day,
-            datetime.weekday,
-            h,
-            datetime.minute,
-            datetime.second
-        ),
-    }
-    // This will print something like: 2020-05-02, 6 19:59:58
+    println!("{}", datetime);
+    // This will print something like: 2020-05-02 19:59:58
 }

@@ -37,9 +37,11 @@
 //!
 //! ### Get the year
 //!
+//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
+//!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::Ds1307;
+//! use ds1307::{Ds1307, Rtcc};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -48,13 +50,14 @@
 //! println!("Year: {}", year);
 //! # }
 //! ```
-//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
 //!
 //! ### Set the year
 //!
+//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
+//!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::Ds1307;
+//! use ds1307::{Ds1307, Rtcc};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -62,55 +65,39 @@
 //! rtc.set_year(2018).unwrap();
 //! # }
 //! ```
-//! Similar methods exist for month, day, weekday, hours, minutes and seconds.
 //!
-//! ### Set the current date and time at once
+//! ### Set and get the current date and time at once
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{Ds1307, DateTime, Hours};
+//! use ds1307::{Ds1307, NaiveDate, Rtcc};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
-//! let datetime = DateTime {
-//!                           year: 2018,
-//!                           month: 08,
-//!                           day: 15,
-//!                           weekday: 4,
-//!                           hour: Hours::H24(19),
-//!                           minute: 59,
-//!                           second: 58
-//!                };
+//! let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
 //! rtc.set_datetime(&datetime).unwrap();
+//! // ...
+//! let datetime = rtc.get_datetime().unwrap();
+//! println!("{}", datetime);
+//! // This will print something like: 2020-05-02 19:59:58
 //! # }
 //! ```
 //!
-//! ### Get the current date and time at once
+//! ### Get the current date
+//!
+//! Similar methods exist for setting the date and for setting
+//! getting the time.
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
-//! use ds1307::{Ds1307, Hours};
+//! use ds1307::{Ds1307, Rtcc};
 //!
 //! # fn main() {
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
-//!
-//! let datetime = rtc.get_datetime().unwrap();
-//!
-//! // The hours depend on the RTC running mode
-//! match datetime.hour {
-//!     Hours::H24(h) => println!("{}-{}-{}, {} {}:{}:{}", datetime.year,
-//!                               datetime.month, datetime.day, datetime.weekday,
-//!                               h, datetime.minute, datetime.second),
-//!     Hours::AM(h) => println!("{}-{}-{}, {} {}:{}:{} AM", datetime.year,
-//!                               datetime.month, datetime.day, datetime.weekday,
-//!                               h, datetime.minute, datetime.second),
-//!     Hours::PM(h) => println!("{}-{}-{}, {} {}:{}:{} PM", datetime.year,
-//!                               datetime.month, datetime.day, datetime.weekday,
-//!                               h, datetime.minute, datetime.second),
-//! }
-//! // This will print something like: 2018-08-15, 4 19:59:58
+//! let date = rtc.get_date().unwrap();
+//! println!("{}", date);
 //! # }
 //! ```
 //!
@@ -174,7 +161,7 @@ pub struct Ds1307<I2C> {
 }
 
 mod datetime;
-pub use crate::datetime::{DateTime, Hours};
+pub use rtcc::{Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike};
 mod ram;
 mod run;
 mod square_wave;
