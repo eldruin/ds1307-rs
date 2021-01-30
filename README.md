@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/ds1307.svg)](https://crates.io/crates/ds1307)
 [![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307)
-[![Build Status](https://travis-ci.org/eldruin/ds1307-rs.svg?branch=master)](https://travis-ci.org/eldruin/ds1307-rs)
+[![Build Status](https://github.com/eldruin/ds1307-rs/workflows/Build/badge.svg)](https://github.com/eldruin/ds1307-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/eldruin/ds1307-rs/badge.svg?branch=master)](https://coveralls.io/r/eldruin/ds1307-rs?branch=master)
 
 This is a platform agnostic Rust driver for the DS1307 real-time clock,
