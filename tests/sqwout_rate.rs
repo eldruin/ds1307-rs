@@ -5,7 +5,7 @@ use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(
     get_01,
-    get_square_wave_output_rate,
+    square_wave_output_rate,
     SqwOutRate::Khz8_192,
     trans_read!(SQWOUT, [0b0000_0010])
 );

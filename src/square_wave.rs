@@ -45,7 +45,7 @@ where
     }
 
     /// Read status of square-wave output level control bit.
-    pub fn get_square_wave_output_level(&mut self) -> Result<SqwOutLevel, Error<E>> {
+    pub fn square_wave_output_level(&mut self) -> Result<SqwOutLevel, Error<E>> {
         if self.register_bit_flag_high(Register::SQWOUT, BitFlags::OUTLEVEL)? {
             Ok(SqwOutLevel::High)
         } else {
@@ -63,7 +63,7 @@ where
     }
 
     /// Read square-wave output rate control bits.
-    pub fn get_square_wave_output_rate(&mut self) -> Result<SqwOutRate, Error<E>> {
+    pub fn square_wave_output_rate(&mut self) -> Result<SqwOutRate, Error<E>> {
         let data = self.read_register(Register::SQWOUT)?;
         let rs1 = (data & BitFlags::OUTRATERS1) != 0;
         let rs0 = (data & BitFlags::OUTRATERS0) != 0;

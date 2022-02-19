@@ -5,13 +5,13 @@ use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(
     get_high,
-    get_square_wave_output_level,
+    square_wave_output_level,
     SqwOutLevel::High,
     trans_read!(SQWOUT, [0b1000_0000])
 );
 get_test!(
     get_low,
-    get_square_wave_output_level,
+    square_wave_output_level,
     SqwOutLevel::Low,
     trans_read!(SQWOUT, [0])
 );
