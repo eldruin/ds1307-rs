@@ -7,10 +7,10 @@
 //! - Read and write user RAM. See: [`read_ram()`].
 //! - Control square-wave output. See: [`enable_square_wave_output()`].
 //!
-//! [`datetime()`]: struct.Ds1307.html#method.datetime
-//! [`set_running()`]: struct.Ds1307.html#method.set_running
-//! [`read_ram()`]: struct.Ds1307.html#method.read_ram
-//! [`enable_square_wave_output()`]: struct.Ds1307.html#method.enable_square_wave_output
+//! [`datetime()`]: Ds1307::datetime
+//! [`set_running()`]: Ds1307::set_running
+//! [`read_ram()`]: Ds1307::read_ram
+//! [`enable_square_wave_output()`]: Ds1307::enable_square_wave_output
 //!
 //! ## The device
 //!
