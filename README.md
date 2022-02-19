@@ -2,6 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/ds1307.svg)](https://crates.io/crates/ds1307)
 [![Docs](https://docs.rs/ds1307/badge.svg)](https://docs.rs/ds1307)
+![MSRV](https://img.shields.io/badge/rustc-1.31+-blue.svg)
 [![Build Status](https://github.com/eldruin/ds1307-rs/workflows/Build/badge.svg)](https://github.com/eldruin/ds1307-rs/actions?query=workflow%3ABuild)
 [![Coverage Status](https://coveralls.io/repos/eldruin/ds1307-rs/badge.svg?branch=master)](https://coveralls.io/r/eldruin/ds1307-rs?branch=master)
 
@@ -59,6 +60,12 @@ fn main() {
     // This will print something like: 2020-05-02 19:59:58
 }
 ```
+
+
+## Minimum Supported Rust Version (MSRV)
+
+This crate is guaranteed to compile on stable Rust 1.31 and up. It *might*
+compile with older versions but that may change in any new patch release.
 
 ## Support
 
