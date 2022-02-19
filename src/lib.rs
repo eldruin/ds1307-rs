@@ -2,12 +2,12 @@
 //! based on the [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
 //!
 //! This driver allows you to:
-//! - Read and set date and time in 12-hour and 24-hour format. See: [`get_datetime()`].
+//! - Read and set date and time in 12-hour and 24-hour format. See: [`datetime()`].
 //! - Enable and disable the real-time clock. See: [`set_running()`].
 //! - Read and write user RAM. See: [`read_ram()`].
 //! - Control square-wave output. See: [`enable_square_wave_output()`].
 //!
-//! [`get_datetime()`]: struct.Ds1307.html#method.get_datetime
+//! [`datetime()`]: struct.Ds1307.html#method.datetime
 //! [`set_running()`]: struct.Ds1307.html#method.set_running
 //! [`read_ram()`]: struct.Ds1307.html#method.read_ram
 //! [`enable_square_wave_output()`]: struct.Ds1307.html#method.enable_square_wave_output
@@ -35,9 +35,33 @@
 //!
 //! [driver-examples]: https://github.com/eldruin/driver-examples
 //!
+//! ### Set and get the current date and time all at once
+//!
+//! Calling the `datetime`/ `set_datetime` methods is recommended
+//! to avoid inconsistencies when reading date/time parts and combining them
+//! as time passes.
+//!
+//! ```no_run
+//! use linux_embedded_hal as hal;
+//! use ds1307::{Ds1307, NaiveDate, DateTimeAccess};
+//!
+//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
+//! let mut rtc = Ds1307::new(dev);
+//! let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
+//! rtc.set_datetime(&datetime).unwrap();
+//! // ...
+//! let datetime = rtc.datetime().unwrap();
+//! println!("{}", datetime);
+//! // This will print something like: 2020-05-02 19:59:58
+//! ```
+//!
 //! ### Get the year
 //!
 //! Similar methods exist for month, day, weekday, hours, minutes and seconds.
+//!
+//! Calling the `datetime`/ `set_datetime` methods instead of these is recommended
+//! to avoid inconsistencies when reading date/time parts and combining them
+//! as time passes.
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
@@ -45,13 +69,17 @@
 //!
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
-//! let year = rtc.get_year().unwrap();
+//! let year = rtc.year().unwrap();
 //! println!("Year: {}", year);
 //! ```
 //!
 //! ### Set the year
 //!
 //! Similar methods exist for month, day, weekday, hours, minutes and seconds.
+//!
+//! Calling the `datetime`/ `set_datetime` methods instead of these is recommended
+//! to avoid inconsistencies when reading date/time parts and combining them
+//! as time passes.
 //!
 //! ```no_run
 //! use linux_embedded_hal as hal;
@@ -60,22 +88,6 @@
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
 //! rtc.set_year(2018).unwrap();
-//! ```
-//!
-//! ### Set and get the current date and time at once
-//!
-//! ```no_run
-//! use linux_embedded_hal as hal;
-//! use ds1307::{Ds1307, NaiveDate, Rtcc};
-//!
-//! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
-//! let mut rtc = Ds1307::new(dev);
-//! let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
-//! rtc.set_datetime(&datetime).unwrap();
-//! // ...
-//! let datetime = rtc.get_datetime().unwrap();
-//! println!("{}", datetime);
-//! // This will print something like: 2020-05-02 19:59:58
 //! ```
 //!
 //! ### Get the current date
@@ -89,7 +101,7 @@
 //!
 //! let dev = hal::I2cdev::new("/dev/i2c-1").unwrap();
 //! let mut rtc = Ds1307::new(dev);
-//! let date = rtc.get_date().unwrap();
+//! let date = rtc.date().unwrap();
 //! println!("{}", date);
 //! ```
 //!
@@ -149,7 +161,9 @@ pub struct Ds1307<I2C> {
 }
 
 mod datetime;
-pub use rtcc::{Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike};
+pub use rtcc::{
+    DateTimeAccess, Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike,
+};
 mod ram;
 mod run;
 mod square_wave;

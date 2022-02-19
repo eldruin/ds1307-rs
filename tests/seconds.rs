@@ -5,14 +5,14 @@ use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(
     can_read_seconds,
-    get_seconds,
+    seconds,
     59,
     trans_read!(SECONDS, [0b0101_1001])
 );
 
 get_test!(
     ch_bit_is_ignored,
-    get_seconds,
+    seconds,
     59,
     trans_read!(SECONDS, [0b1101_1001])
 );

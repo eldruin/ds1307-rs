@@ -1,71 +1,16 @@
 use crate::{BitFlags, Ds1307, Error, Register, ADDR};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
-pub use rtcc::{Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike};
+pub use rtcc::{
+    DateTimeAccess, Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike,
+};
 
-impl<I2C, E> Rtcc for Ds1307<I2C>
+impl<I2C, E> DateTimeAccess for Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
 {
     type Error = Error<E>;
 
-    fn get_seconds(&mut self) -> Result<u8, Self::Error> {
-        let data = self.read_register(Register::SECONDS)?;
-        Ok(packed_bcd_to_decimal(remove_ch_bit(data)))
-    }
-
-    fn get_minutes(&mut self) -> Result<u8, Self::Error> {
-        self.read_register_decimal(Register::MINUTES)
-    }
-
-    fn get_hours(&mut self) -> Result<Hours, Self::Error> {
-        let data = self.read_register(Register::HOURS)?;
-        self.get_hours_from_register(data)
-    }
-
-    fn get_weekday(&mut self) -> Result<u8, Self::Error> {
-        self.read_register_decimal(Register::DOW)
-    }
-
-    fn get_day(&mut self) -> Result<u8, Self::Error> {
-        self.read_register_decimal(Register::DOM)
-    }
-
-    fn get_month(&mut self) -> Result<u8, Self::Error> {
-        self.read_register_decimal(Register::MONTH)
-    }
-
-    fn get_year(&mut self) -> Result<u16, Self::Error> {
-        let year = self.read_register_decimal(Register::YEAR)?;
-        Ok(2000 + u16::from(year))
-    }
-
-    fn get_date(&mut self) -> Result<NaiveDate, Self::Error> {
-        let mut data = [0; 3];
-        self.i2c
-            .write_read(ADDR, &[Register::DOM], &mut data)
-            .map_err(Error::I2C)?;
-        let year = 2000 + u16::from(packed_bcd_to_decimal(data[2]));
-        let month = packed_bcd_to_decimal(data[1]);
-        let day = packed_bcd_to_decimal(data[0]);
-        Ok(NaiveDate::from_ymd(year.into(), month.into(), day.into()))
-    }
-
-    fn get_time(&mut self) -> Result<NaiveTime, Self::Error> {
-        let mut data = [0; 3];
-        self.i2c
-            .write_read(ADDR, &[Register::SECONDS], &mut data)
-            .map_err(Error::I2C)?;
-        let hour = self.get_hours_from_register(data[Register::HOURS as usize])?;
-        let minute = packed_bcd_to_decimal(data[Register::MINUTES as usize]);
-        let second = packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]));
-        Ok(NaiveTime::from_hms(
-            get_h24(hour).into(),
-            minute.into(),
-            second.into(),
-        ))
-    }
-
-    fn get_datetime(&mut self) -> Result<NaiveDateTime, Self::Error> {
+    fn datetime(&mut self) -> Result<NaiveDateTime, Self::Error> {
         let mut data = [0; 7];
         self.i2c
             .write_read(ADDR, &[0x00], &mut data)
@@ -83,6 +28,87 @@ where
                 second.into(),
             ),
         )
+    }
+
+    fn set_datetime(&mut self, datetime: &NaiveDateTime) -> Result<(), Self::Error> {
+        if datetime.year() < 2000 || datetime.year() > 2099 {
+            return Err(Error::InvalidInputData);
+        }
+        let hour = self.get_hours_register_value(Hours::H24(datetime.hour() as u8))?;
+        let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
+        let payload = [
+            Register::SECONDS,
+            decimal_to_packed_bcd(datetime.second() as u8) | ch_flag,
+            decimal_to_packed_bcd(datetime.minute() as u8),
+            hour,
+            datetime.weekday().number_from_sunday() as u8,
+            decimal_to_packed_bcd(datetime.day() as u8),
+            decimal_to_packed_bcd(datetime.month() as u8),
+            decimal_to_packed_bcd((datetime.year() - 2000) as u8),
+        ];
+        self.i2c.write(ADDR, &payload).map_err(Error::I2C)
+    }
+}
+
+impl<I2C, E> Rtcc for Ds1307<I2C>
+where
+    I2C: Write<Error = E> + WriteRead<Error = E>,
+{
+    fn seconds(&mut self) -> Result<u8, Self::Error> {
+        let data = self.read_register(Register::SECONDS)?;
+        Ok(packed_bcd_to_decimal(remove_ch_bit(data)))
+    }
+
+    fn minutes(&mut self) -> Result<u8, Self::Error> {
+        self.read_register_decimal(Register::MINUTES)
+    }
+
+    fn hours(&mut self) -> Result<Hours, Self::Error> {
+        let data = self.read_register(Register::HOURS)?;
+        self.get_hours_from_register(data)
+    }
+
+    fn weekday(&mut self) -> Result<u8, Self::Error> {
+        self.read_register_decimal(Register::DOW)
+    }
+
+    fn day(&mut self) -> Result<u8, Self::Error> {
+        self.read_register_decimal(Register::DOM)
+    }
+
+    fn month(&mut self) -> Result<u8, Self::Error> {
+        self.read_register_decimal(Register::MONTH)
+    }
+
+    fn year(&mut self) -> Result<u16, Self::Error> {
+        let year = self.read_register_decimal(Register::YEAR)?;
+        Ok(2000 + u16::from(year))
+    }
+
+    fn date(&mut self) -> Result<NaiveDate, Self::Error> {
+        let mut data = [0; 3];
+        self.i2c
+            .write_read(ADDR, &[Register::DOM], &mut data)
+            .map_err(Error::I2C)?;
+        let year = 2000 + u16::from(packed_bcd_to_decimal(data[2]));
+        let month = packed_bcd_to_decimal(data[1]);
+        let day = packed_bcd_to_decimal(data[0]);
+        Ok(NaiveDate::from_ymd(year.into(), month.into(), day.into()))
+    }
+
+    fn time(&mut self) -> Result<NaiveTime, Self::Error> {
+        let mut data = [0; 3];
+        self.i2c
+            .write_read(ADDR, &[Register::SECONDS], &mut data)
+            .map_err(Error::I2C)?;
+        let hour = self.get_hours_from_register(data[Register::HOURS as usize])?;
+        let minute = packed_bcd_to_decimal(data[Register::MINUTES as usize]);
+        let second = packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]));
+        Ok(NaiveTime::from_hms(
+            get_h24(hour).into(),
+            minute.into(),
+            second.into(),
+        ))
     }
 
     fn set_seconds(&mut self, seconds: u8) -> Result<(), Self::Error> {
@@ -159,25 +185,6 @@ where
             decimal_to_packed_bcd(time.second() as u8) | ch_flag,
             decimal_to_packed_bcd(time.minute() as u8),
             hour,
-        ];
-        self.i2c.write(ADDR, &payload).map_err(Error::I2C)
-    }
-
-    fn set_datetime(&mut self, datetime: &NaiveDateTime) -> Result<(), Self::Error> {
-        if datetime.year() < 2000 || datetime.year() > 2099 {
-            return Err(Error::InvalidInputData);
-        }
-        let hour = self.get_hours_register_value(Hours::H24(datetime.hour() as u8))?;
-        let ch_flag = self.read_register(Register::SECONDS)? & BitFlags::CH;
-        let payload = [
-            Register::SECONDS,
-            decimal_to_packed_bcd(datetime.second() as u8) | ch_flag,
-            decimal_to_packed_bcd(datetime.minute() as u8),
-            hour,
-            datetime.weekday().number_from_sunday() as u8,
-            decimal_to_packed_bcd(datetime.day() as u8),
-            decimal_to_packed_bcd(datetime.month() as u8),
-            decimal_to_packed_bcd((datetime.year() - 2000) as u8),
         ];
         self.i2c.write(ADDR, &payload).map_err(Error::I2C)
     }

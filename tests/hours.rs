@@ -5,7 +5,7 @@ use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(
     can_read_24h_hours,
-    get_hours,
+    hours,
     Hours::H24(23),
     trans_read!(HOURS, [0b0010_0011])
 );
@@ -19,7 +19,7 @@ set_test!(
 
 get_test!(
     can_read_h12_am_hours,
-    get_hours,
+    hours,
     Hours::AM(12),
     trans_read!(HOURS, [0b0101_0010])
 );
@@ -34,7 +34,7 @@ set_test!(
 
 get_test!(
     can_read_h12_pm_hours,
-    get_hours,
+    hours,
     Hours::PM(12),
     trans_read!(HOURS, [0b0111_0010])
 );

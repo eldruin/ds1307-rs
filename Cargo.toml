@@ -22,7 +22,7 @@ edition = "2018"
 
 [dependencies]
 embedded-hal = "0.2"
-rtcc = "0.2"
+rtcc = "0.3"
 
 [dev-dependencies]
 linux-embedded-hal = "0.3"

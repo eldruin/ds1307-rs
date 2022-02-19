@@ -11,7 +11,7 @@ based on the [`embedded-hal`] traits.
 [`embedded-hal`]: https://github.com/rust-embedded/embedded-hal
 
 This driver allows you to:
-- Read and set date and time in 12-hour and 24-hour format. See: `get_datetime`
+- Read and set date and time in 12-hour and 24-hour format. See: `datetime`
 - Enable and disable the real-time clock. See: `set_running`
 - Read and write user RAM. See: `read_ram`
 - Control square-wave output. See: `enable_square_wave_output`
@@ -45,7 +45,7 @@ Please find additional examples using hardware in this repository: [driver-examp
 [driver-examples]: https://github.com/eldruin/driver-examples
 
 ```rust
-use ds1307::{Ds1307, NaiveDate, Rtcc};
+use ds1307::{Ds1307, NaiveDate, DateTimeAccess};
 use linux_embedded_hal::I2cdev;
 
 fn main() {
@@ -54,7 +54,7 @@ fn main() {
     let datetime = NaiveDate::from_ymd(2020, 5, 2).and_hms(19, 59, 58);
     rtc.set_datetime(&datetime).unwrap();
     // ...
-    let datetime = rtc.get_datetime().unwrap();
+    let datetime = rtc.datetime().unwrap();
     println!("{}", datetime);
     // This will print something like: 2020-05-02 19:59:58
 }

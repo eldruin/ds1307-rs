@@ -1,4 +1,4 @@
-use ds1307::{Error, NaiveDate, NaiveDateTime, NaiveTime, Rtcc};
+use ds1307::{DateTimeAccess, Error, NaiveDate, NaiveDateTime, NaiveTime, Rtcc};
 use embedded_hal_mock::i2c::Transaction as I2cTrans;
 mod common;
 use crate::common::{destroy, new, Register, ADDR};
@@ -21,14 +21,14 @@ fn get_datetime() {
             0b0001_1000
         ]
     ));
-    assert_eq!(get_valid_datetime(), dev.get_datetime().unwrap());
+    assert_eq!(get_valid_datetime(), dev.datetime().unwrap());
     destroy(dev);
 }
 
 #[test]
 fn get_date() {
     let mut dev = new(&trans_read!(DOM, [0b0001_0011, 0b0000_1000, 0b0001_1000]));
-    assert_eq!(NaiveDate::from_ymd(2018, 8, 13), dev.get_date().unwrap());
+    assert_eq!(NaiveDate::from_ymd(2018, 8, 13), dev.date().unwrap());
     destroy(dev);
 }
 
@@ -38,7 +38,7 @@ fn get_time() {
         SECONDS,
         [0b1101_1000, 0b0101_1001, 0b0010_0011]
     ));
-    assert_eq!(NaiveTime::from_hms(23, 59, 58), dev.get_time().unwrap());
+    assert_eq!(NaiveTime::from_hms(23, 59, 58), dev.time().unwrap());
     destroy(dev);
 }
 
@@ -124,23 +124,14 @@ macro_rules! individual_test {
     };
 }
 
-individual_test!(day_of_month, DOM, get_day, set_day, 31, 0b0011_0001, 0, 32);
-individual_test!(day_of_week, DOW, get_weekday, set_weekday, 7, 7, 0, 8);
-individual_test!(month, MONTH, get_month, set_month, 12, 0b0001_0010, 0, 13);
-individual_test!(
-    year,
-    YEAR,
-    get_year,
-    set_year,
-    2099,
-    0b1001_1001,
-    1999,
-    2100
-);
+individual_test!(day_of_month, DOM, day, set_day, 31, 0b0011_0001, 0, 32);
+individual_test!(day_of_week, DOW, weekday, set_weekday, 7, 7, 0, 8);
+individual_test!(month, MONTH, month, set_month, 12, 0b0001_0010, 0, 13);
+individual_test!(year, YEAR, year, set_year, 2099, 0b1001_1001, 1999, 2100);
 
 mod minutes {
     use super::*;
-    get_test!(get, get_minutes, 59, trans_read!(MINUTES, [0b0101_1001]));
+    get_test!(get, minutes, 59, trans_read!(MINUTES, [0b0101_1001]));
     set_invalid_test!(wrong, set_minutes, 60);
     set_test!(set, set_minutes, 59, trans_write!(MINUTES, [0b0101_1001]));
 }
