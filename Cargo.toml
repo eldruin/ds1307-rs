@@ -19,6 +19,7 @@ include = [
     "/LICENSE-APACHE",
 ]
 edition = "2018"
+rust-version = "1.62"
 
 [dependencies]
 embedded-hal = "0.2.7"
