@@ -4,7 +4,10 @@ mod common;
 use crate::common::{destroy, new, Register, ADDR};
 
 fn get_valid_datetime() -> NaiveDateTime {
-    NaiveDate::from_ymd(2018, 8, 13).and_hms(23, 59, 58)
+    NaiveDate::from_ymd_opt(2018, 8, 13)
+        .unwrap()
+        .and_hms_opt(23, 59, 58)
+        .unwrap()
 }
 
 #[test]
@@ -28,7 +31,10 @@ fn get_datetime() {
 #[test]
 fn get_date() {
     let mut dev = new(&trans_read!(DOM, [0b0001_0011, 0b0000_1000, 0b0001_1000]));
-    assert_eq!(NaiveDate::from_ymd(2018, 8, 13), dev.date().unwrap());
+    assert_eq!(
+        NaiveDate::from_ymd_opt(2018, 8, 13).unwrap(),
+        dev.date().unwrap()
+    );
     destroy(dev);
 }
 
@@ -38,19 +44,28 @@ fn get_time() {
         SECONDS,
         [0b1101_1000, 0b0101_1001, 0b0010_0011]
     ));
-    assert_eq!(NaiveTime::from_hms(23, 59, 58), dev.time().unwrap());
+    assert_eq!(
+        NaiveTime::from_hms_opt(23, 59, 58).unwrap(),
+        dev.time().unwrap()
+    );
     destroy(dev);
 }
 
 set_invalid_test!(
     year_too_small,
     set_datetime,
-    &NaiveDate::from_ymd(1999, 1, 1).and_hms(1, 1, 1)
+    &NaiveDate::from_ymd_opt(1999, 1, 1)
+        .unwrap()
+        .and_hms_opt(1, 1, 1)
+        .unwrap()
 );
 set_invalid_test!(
     year_too_big,
     set_datetime,
-    &NaiveDate::from_ymd(2100, 1, 1).and_hms(1, 1, 1)
+    &NaiveDate::from_ymd_opt(2100, 1, 1)
+        .unwrap()
+        .and_hms_opt(1, 1, 1)
+        .unwrap()
 );
 
 #[test]
@@ -85,7 +100,8 @@ fn can_set_time() {
             vec![Register::SECONDS, 0b1101_1000, 0b0101_1001, 0b0010_0011],
         ),
     ]);
-    rtc.set_time(&NaiveTime::from_hms(23, 59, 58)).unwrap();
+    rtc.set_time(&NaiveTime::from_hms_opt(23, 59, 58).unwrap())
+        .unwrap();
     destroy(rtc);
 }
 
@@ -95,7 +111,8 @@ fn can_set_date() {
         DOW,
         [0b0000_0010, 0b0001_0011, 0b0000_1000, 0b0001_1000]
     ));
-    rtc.set_date(&NaiveDate::from_ymd(2018, 8, 13)).unwrap();
+    rtc.set_date(&NaiveDate::from_ymd_opt(2018, 8, 13).unwrap())
+        .unwrap();
     destroy(rtc);
 }
 

@@ -21,13 +21,10 @@ where
         let hour = self.get_hours_from_register(data[Register::HOURS as usize])?;
         let minute = packed_bcd_to_decimal(data[Register::MINUTES as usize]);
         let second = packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]));
-        Ok(
-            NaiveDate::from_ymd(year.into(), month.into(), day.into()).and_hms(
-                get_h24(hour).into(),
-                minute.into(),
-                second.into(),
-            ),
-        )
+        let date = NaiveDate::from_ymd_opt(year.into(), month.into(), day.into())
+            .ok_or(Error::InvalidInputData)?;
+        date.and_hms_opt(get_h24(hour).into(), minute.into(), second.into())
+            .ok_or(Error::InvalidInputData)
     }
 
     fn set_datetime(&mut self, datetime: &NaiveDateTime) -> Result<(), Self::Error> {
@@ -50,6 +47,7 @@ where
     }
 }
 
+#[allow(clippy::manual_range_contains)]
 impl<I2C, E> Rtcc for Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
@@ -93,7 +91,8 @@ where
         let year = 2000 + u16::from(packed_bcd_to_decimal(data[2]));
         let month = packed_bcd_to_decimal(data[1]);
         let day = packed_bcd_to_decimal(data[0]);
-        Ok(NaiveDate::from_ymd(year.into(), month.into(), day.into()))
+        NaiveDate::from_ymd_opt(year.into(), month.into(), day.into())
+            .ok_or(Error::InvalidInputData)
     }
 
     fn time(&mut self) -> Result<NaiveTime, Self::Error> {
@@ -104,11 +103,8 @@ where
         let hour = self.get_hours_from_register(data[Register::HOURS as usize])?;
         let minute = packed_bcd_to_decimal(data[Register::MINUTES as usize]);
         let second = packed_bcd_to_decimal(remove_ch_bit(data[Register::SECONDS as usize]));
-        Ok(NaiveTime::from_hms(
-            get_h24(hour).into(),
-            minute.into(),
-            second.into(),
-        ))
+        NaiveTime::from_hms_opt(get_h24(hour).into(), minute.into(), second.into())
+            .ok_or(Error::InvalidInputData)
     }
 
     fn set_seconds(&mut self, seconds: u8) -> Result<(), Self::Error> {
@@ -190,6 +186,7 @@ where
     }
 }
 
+#[allow(clippy::manual_range_contains)]
 impl<I2C, E> Ds1307<I2C>
 where
     I2C: Write<Error = E> + WriteRead<Error = E>,
