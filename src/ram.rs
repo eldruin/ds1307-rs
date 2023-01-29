@@ -18,7 +18,7 @@ where
         if data.is_empty() {
             return Ok(());
         }
-        self.check_ram_parameters(address_offset, &data)?;
+        self.check_ram_parameters(address_offset, data)?;
         self.i2c
             .write_read(ADDR, &[Register::RAM_BEGIN + address_offset], &mut data[..])
             .map_err(Error::I2C)
@@ -35,10 +35,10 @@ where
         if data.is_empty() {
             return Ok(());
         }
-        self.check_ram_parameters(address_offset, &data)?;
+        self.check_ram_parameters(address_offset, data)?;
         let mut payload = [0; RAM_BYTE_COUNT + 1];
         payload[0] = Register::RAM_BEGIN + address_offset;
-        payload[1..=data.len()].copy_from_slice(&data);
+        payload[1..=data.len()].copy_from_slice(data);
         self.i2c
             .write(ADDR, &payload[..=data.len()])
             .map_err(Error::I2C)
