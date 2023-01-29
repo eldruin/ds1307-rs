@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Default variant for `SqwOutRate` and `SqwOutLevel`.
+
 ### Changed
 - Updated internal use of `chrono`.
 - Updated `embedded-hal-mock` dev-dependency.

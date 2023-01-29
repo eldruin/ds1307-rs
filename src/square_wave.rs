@@ -2,7 +2,7 @@ use crate::{BitFlags, Ds1307, Error, Register};
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 
 /// Square-wave output rate
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub enum SqwOutRate {
     /// 1 Hz
     Hz1,
@@ -11,15 +11,17 @@ pub enum SqwOutRate {
     /// 8.192 kHz
     Khz8_192,
     /// 32.768 kHz
+    #[default]
     Khz32_768,
 }
 
 /// Square-wave output level
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub enum SqwOutLevel {
     /// Low
     Low,
     /// High
+    #[default]
     High,
 }
 
