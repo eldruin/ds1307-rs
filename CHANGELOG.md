@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Updated internal use of `chrono`.
+- Updated `embedded-hal-mock` dev-dependency.
 - Updated MSRV to 1.62.0.
 
 ## [0.4.0] - 2022-02-19

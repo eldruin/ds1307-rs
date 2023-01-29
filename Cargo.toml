@@ -27,7 +27,7 @@ rtcc = "0.3"
 
 [dev-dependencies]
 linux-embedded-hal = "0.3.2"
-embedded-hal-mock = "0.8"
+embedded-hal-mock = "0.9"
 
 [profile.release]
 lto = true
