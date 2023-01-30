@@ -7,7 +7,7 @@ where
 {
     /// Read if the clock is running.
     pub fn running(&mut self) -> Result<bool, Error<E>> {
-        self.register_bit_flag_high(Register::SECONDS, BitFlags::CH)
+        Ok(!self.register_bit_flag_high(Register::SECONDS, BitFlags::CH)?)
     }
 
     /// Set the clock to run (default on power-on).
