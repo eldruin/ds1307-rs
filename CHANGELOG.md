@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated internal use of `chrono`.
 - Updated `embedded-hal-mock` dev-dependency.
 - Updated MSRV to 1.62.0.
-- [breaking-change] Swap implementations of `set_running` and `halt`, inverted output of `running` as CH bit was interpreted incorrectly.
+
+### Fixed
+- Swapped implementations of `set_running` and `halt` and fixed output level of `running`.
 
 ## [0.4.0] - 2022-02-19
 
