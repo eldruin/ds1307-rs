@@ -3,7 +3,12 @@ mod common;
 use crate::common::{destroy, new, Register, ADDR};
 
 get_test!(running, running, true, trans_read!(SECONDS, [0]));
-get_test!(not_running, running, false, trans_read!(SECONDS, [0b1000_0000]));
+get_test!(
+    not_running,
+    running,
+    false,
+    trans_read!(SECONDS, [0b1000_0000])
+);
 
 #[test]
 fn can_set_running() {
