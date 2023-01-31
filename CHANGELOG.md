@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated `embedded-hal-mock` dev-dependency.
 - Updated MSRV to 1.62.0.
 
+### Fixed
+- Swapped implementations of `set_running` and `halt` and fixed output level of `running`.
+
 ## [0.4.0] - 2022-02-19
 
 ### Changed
