@@ -1,9 +1,9 @@
 use crate::{BitFlags, Ds1307, Error, Register};
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     /// Read if the clock is running.
     pub fn running(&mut self) -> Result<bool, Error<E>> {

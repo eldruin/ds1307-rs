@@ -1,11 +1,11 @@
 use crate::{Ds1307, Error, Register, ADDR};
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 
 const RAM_BYTE_COUNT: usize = (Register::RAM_END - Register::RAM_BEGIN + 1) as usize;
 
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     /// Read a data array from the user RAM starting at the given offset.
     ///

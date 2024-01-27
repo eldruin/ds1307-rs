@@ -1,5 +1,5 @@
 use crate::{Ds1307, Error};
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 
 pub struct Register;
 impl Register {
@@ -30,7 +30,7 @@ pub const ADDR: u8 = 0b110_1000;
 
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     pub(crate) fn register_bit_flag_high(
         &mut self,

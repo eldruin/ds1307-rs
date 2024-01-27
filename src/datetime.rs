@@ -1,12 +1,12 @@
 use crate::{BitFlags, Ds1307, Error, Register, ADDR};
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 pub use rtcc::{
     DateTimeAccess, Datelike, Hours, NaiveDate, NaiveDateTime, NaiveTime, Rtcc, Timelike,
 };
 
 impl<I2C, E> DateTimeAccess for Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     type Error = Error<E>;
 
@@ -50,7 +50,7 @@ where
 #[allow(clippy::manual_range_contains)]
 impl<I2C, E> Rtcc for Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     fn seconds(&mut self) -> Result<u8, Self::Error> {
         let data = self.read_register(Register::SECONDS)?;
@@ -189,7 +189,7 @@ where
 #[allow(clippy::manual_range_contains)]
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     fn get_hours_from_register(&self, data: u8) -> Result<Hours, Error<E>> {
         if is_24h_format(data) {

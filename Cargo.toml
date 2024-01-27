@@ -22,12 +22,12 @@ edition = "2021"
 rust-version = "1.62"
 
 [dependencies]
-embedded-hal = "0.2.7"
+embedded-hal = "1.0"
 rtcc = "0.3"
 
 [dev-dependencies]
-linux-embedded-hal = "0.3.2"
-embedded-hal-mock = "0.9"
+linux-embedded-hal = "0.4"
+embedded-hal-mock = { version = "0.10", default-features = false, features = ["eh1"]}
 
 [profile.release]
 lto = true

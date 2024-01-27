@@ -142,7 +142,7 @@
 #![deny(missing_docs)]
 #![no_std]
 
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 
 /// All possible errors in this crate
 #[derive(Debug)]
@@ -173,7 +173,7 @@ use crate::register_access::{BitFlags, Register, ADDR};
 
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     /// Create a new instance.
     pub fn new(i2c: I2C) -> Self {

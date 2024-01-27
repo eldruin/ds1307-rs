@@ -1,7 +1,5 @@
-extern crate ds1307;
-extern crate embedded_hal_mock as hal;
-use self::ds1307::Ds1307;
-use self::hal::i2c::{Mock as I2cMock, Transaction as I2cTrans};
+use ds1307::Ds1307;
+use embedded_hal_mock::eh1::i2c::{Mock as I2cMock, Transaction as I2cTrans};
 
 pub const ADDR: u8 = 0b110_1000;
 

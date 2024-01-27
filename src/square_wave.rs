@@ -1,5 +1,5 @@
 use crate::{BitFlags, Ds1307, Error, Register};
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 
 /// Square-wave output rate
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -27,7 +27,7 @@ pub enum SqwOutLevel {
 
 impl<I2C, E> Ds1307<I2C>
 where
-    I2C: Write<Error = E> + WriteRead<Error = E>,
+    I2C: I2c<Error = E>,
 {
     /// Read whether the square-wave output is enabled.
     pub fn square_wave_output_enabled(&mut self) -> Result<bool, Error<E>> {
